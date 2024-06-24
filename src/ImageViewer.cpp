@@ -120,7 +120,7 @@ inline int32_t getTextAreaHeight(void) {
 // ----------------------------------------------------------------------------
 #include <ESP32-targz.h>
 #include <M5StackUpdater.h>
-#define APP_VER   "SDU-imageViewer-230623"
+#define APP_VER   "SDU-imageViewer-v201-230624"
 #define APP_NAME  "SDU-imageViewer"  // app Name
 #define APP_BIN   "/21_imgView.bin"  // app bin file-name
 #define TIMEOUT00 5000               // lobby countdouwn timeout : msec
@@ -135,14 +135,8 @@ void prtln(String sData, int direction = D3_BOTH);
 void POWER_OFF();
 void REBOOT();
 // ----------------------------------------------------------------------------
-const char* ImageViewer::VERSION = "v105-Sv201";
+const char* ImageViewer::VERSION = "v105-mod-V201";
 const char* ImageViewer::DEFAULT_CONFIG_NAME = "imgView.json";
-// const char* ImageViewer::KEY_AUTO_MODE = "AutoMode";
-// const char* ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
-// const char* ImageViewer::KEY_AUTO_MODE_RANDOMIZED = "AutoModeRandomized";
-// const char* ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
-// const char* ImageViewer::KEY_ORIENTATION = "Orientation";
-// const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
 const String ImageViewer::ROOT_DIR("/app/imgView");
 // ----------------------------------------------------------------------------
 // const char* ImageViewer::VERSION = "v1.0.5";
@@ -217,25 +211,36 @@ bool ImageViewer::begin(int bgColor) {
 
     M5.Lcd.setFileStorage(IV_FS);
 
-    M5.Lcd.printf("Image Viewer %s", VERSION);
-    M5.Lcd.println();
+    // M5.Lcd.printf("Image Viewer %s", VERSION);
+    // M5.Lcd.println();
+    String msg = "Image Viewer " + String(VERSION) ;
+    prtln(msg);
+    
     if (!parse()) {
         return false;
     }
 
     M5_UPDATE();
-    M5.Lcd.println("Mode:");
+    // M5.Lcd.println("Mode:");
+    prtln("Mode:");
+    
     if (M5.BtnA.isPressed()) {
         this->_isAutoMode = true;  // overriding the setting
-        M5.Lcd.println(" Auto(Forced)");
+        // M5.Lcd.println(" Auto(Forced)");
+        prtln(" Auto(Forced)");
     } else {
-        M5.Lcd.println(this->_isAutoMode ? " Auto" : " Manual");
+        // M5.Lcd.println(this->_isAutoMode ? " Auto" : " Manual");
+        String msg = String(this->_isAutoMode ? " Auto" : " Manual");
+        prtln(msg);
     }
 
-    M5.Lcd.println("Rotation:");
+    // M5.Lcd.println("Rotation:");
+    prtln("Rotation:");
+
     if (this->_isAutoRotation) {
         if (M5.Imu.isEnabled()) {
-            M5.Lcd.println(" Auto");
+            // M5.Lcd.println(" Auto");
+            prtln(" Auto");
             if (M5.getBoard() == m5::board_t::board_M5Stack ||
                 M5.getBoard() == m5::board_t::board_M5StackCoreS3 ||
                 M5.getBoard() == m5::board_t::board_M5StackCore2) {
@@ -245,10 +250,13 @@ bool ImageViewer::begin(int bgColor) {
             }
         } else {
             this->_isAutoRotation = false;
-            M5.Lcd.println(" No(IMU disabled)");
+            // M5.Lcd.println(" No(IMU disabled)");
+            prtln(" No(IMU disabled)");
+
         }
     } else {
-        M5.Lcd.println(" No");
+        // M5.Lcd.println(" No");
+        prtln(" No");
     }
 
     delay(DEFAULT_START_INTERVAL_MS);
