@@ -141,7 +141,7 @@ inline int32_t getTextAreaHeight(void) {
 
 // -----mode by NoRi 2024-06-24 -----------------------------------------------
 const char* ImageViewer::VERSION = "v105-mod-V201";
-const char* ImageViewer::DEFAULT_CONFIG_NAME = "imgView.json";
+const char* ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
 const String ImageViewer::ROOT_DIR("/app/imgView");
 // ----------------------------------------------------------------------------
 // const char* ImageViewer::VERSION = "v1.0.5";
@@ -326,6 +326,12 @@ bool ImageViewer::setImageFileList(const String& path) {
         prtln(msg);
         return false;
     }
+    else
+    {
+        String msg = "Success to open image data folder :  \"" + ROOT_DIR + "\"";
+        prtln(msg);
+    }
+    
     File f = root.openNextFile();
     while (f && this->_nImageFiles < MAX_IMAGE_FILES) {
         if (!f.isDirectory() && isImageFile(f)) {
@@ -452,7 +458,10 @@ bool ImageViewer::parse(const char* config) {
         prtln("config is null");
         return false;
     }
-    const String filename = ROOT_DIR + config;
+    
+    // const String filename = ROOT_DIR + config;
+    const String filename = config;
+    
     if (!IV_FS.exists(filename)) {
         // M5_LOGW("%s is not found", filename.c_str());
         String msg = filename + " is not found";
