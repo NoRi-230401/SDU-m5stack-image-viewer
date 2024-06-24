@@ -1,6 +1,6 @@
 #include "ImageViewer.hpp"
 
-// ----------------------------------------------------------------------------
+// -----add by NoRi 2024-06-24 -----------------------------------------------
 #include <ESP32-targz.h>
 #include <M5StackUpdater.h>
 #define APP_VER   "SDU-imageViewer-v201-230624"
@@ -18,7 +18,6 @@ void prtln(String sData, int direction = D3_BOTH);
 void POWER_OFF();
 void REBOOT();
 // ----------------------------------------------------------------------------
-
 
 #if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
 #include "M5Encoder.hpp"
@@ -110,10 +109,10 @@ inline void M5_UPDATE(void) {
 
 inline int32_t getDirection(void) {
     if (M5.BtnA.wasClicked()) {
-        prtln("BtnA was Clicked!", D1_SERI);
+        // prtln("BtnA was Clicked!", D1_SERI);
         return 1;
     } else if (M5.BtnC.wasClicked()) {
-        prtln("BtnC was Clicked!", D1_SERI);
+        // prtln("BtnC was Clicked!", D1_SERI);
         return -1;
     } else {
         return 0;
@@ -139,24 +138,8 @@ inline int32_t getTextAreaHeight(void) {
 
 #include <Arduino_JSON.h>
 #include <string.h>
-// ----------------------------------------------------------------------------
-// #include <ESP32-targz.h>
-// #include <M5StackUpdater.h>
-// #define APP_VER   "SDU-imageViewer-v201-230624"
-// #define APP_NAME  "SDU-imageViewer"  // app Name
-// #define APP_BIN   "/21_imgView.bin"  // app bin file-name
-// #define TIMEOUT00 5000               // lobby countdouwn timeout : msec
-// #define D1_SERI   1
-// #define D2_DISP   2
-// #define D3_BOTH   3
-// int SDCARD_CS_PIN = 4;
-// void setupSDUpdater(const char* appName);
-// bool SdBegin();
-// void prt(String sData, int direction = D3_BOTH);
-// void prtln(String sData, int direction = D3_BOTH);
-// void POWER_OFF();
-// void REBOOT();
-// ----------------------------------------------------------------------------
+
+// -----mode by NoRi 2024-06-24 -----------------------------------------------
 const char* ImageViewer::VERSION = "v105-mod-V201";
 const char* ImageViewer::DEFAULT_CONFIG_NAME = "imgView.json";
 const String ImageViewer::ROOT_DIR("/app/imgView");
@@ -465,20 +448,28 @@ uint8_t ImageViewer::detectOrientation(float threshold) {
 
 bool ImageViewer::parse(const char* config) {
     if (config == nullptr) {
-        M5_LOGE("config is null");
+        // M5_LOGE("config is null");
+        prtln("config is null");
         return false;
     }
     const String filename = ROOT_DIR + config;
     if (!IV_FS.exists(filename)) {
-        M5_LOGW("%s is not found", filename.c_str());
+        // M5_LOGW("%s is not found", filename.c_str());
+        String msg = filename + " is not found";
+        prtln(msg);
         return true;  // use default
     }
-    M5.Lcd.println("Config:");
-    M5.Lcd.printf(" %s", filename.c_str());
-    M5.Lcd.println();
+    // M5.Lcd.println("Config:");
+    // M5.Lcd.printf(" %s", filename.c_str());
+    // M5.Lcd.println();
+    String msg = "Config: " + filename;
+    prtln(msg);
+
     File f = IV_FS.open(filename, "r");
     if (!f) {
-        M5.Lcd.println(" E: failed to open");
+        // M5.Lcd.println(" E: failed to open");
+        String msg = " E: failed to open";
+        prtln(msg);
         return false;
     }
     uint8_t buf[f.size()] = {0};
@@ -487,31 +478,42 @@ bool ImageViewer::parse(const char* config) {
 
     JSONVar o = JSON.parse((const char*)buf);
     if (JSON.typeof(o) == "undefined") {
-        M5.Lcd.println(" E: parse");
+        // M5.Lcd.println(" E: parse");
+        prtln(" E: parse");
         return false;
     }
     if (o.hasOwnProperty(KEY_AUTO_MODE)) {
         this->_isAutoMode = (bool)o[KEY_AUTO_MODE];
     }
-    M5.Lcd.printf(" AutoMode: %s", this->_isAutoMode ? "true" : "false");
-    M5.Lcd.println();
+    // M5.Lcd.printf(" AutoMode: %s", this->_isAutoMode ? "true" : "false");
+    // M5.Lcd.println();
+
+    msg = " AutoMode: " + String( this->_isAutoMode ? "true" : "false" );
+    prtln(msg);
+
     if (o.hasOwnProperty(KEY_AUTO_MODE_INTERVAL)) {
         this->_autoModeInterval = (uint32_t)o[KEY_AUTO_MODE_INTERVAL];
     }
-    M5.Lcd.printf(" Interval: %dms", this->_autoModeInterval);
-    M5.Lcd.println();
+    // M5.Lcd.printf(" Interval: %dms", this->_autoModeInterval);
+    // M5.Lcd.println();
+    msg = " Interval: " + String( this->_autoModeInterval,10);
+    prtln(msg);
     if (o.hasOwnProperty(KEY_AUTO_MODE_RANDOMIZED)) {
         this->_isAutoModeRandomized = (bool)o[KEY_AUTO_MODE_RANDOMIZED];
     }
-    M5.Lcd.printf(" Randomized: %s",
-                  this->_isAutoModeRandomized ? "true" : "false");
-    M5.Lcd.println();
+    // M5.Lcd.printf(" Randomized: %s", this->_isAutoModeRandomized ? "true" : "false");
+    // M5.Lcd.println();
+    msg = " Randomized: " + String(this->_isAutoModeRandomized ? "true" : "false");
+    prtln(msg);
+
     if (o.hasOwnProperty(KEY_AUTO_ROTATION)) {
         this->_isAutoRotation = (bool)o[KEY_AUTO_ROTATION];
     }
-    M5.Lcd.printf(" AutoRotation: %s",
-                  this->_isAutoRotation ? "true" : "false");
-    M5.Lcd.println();
+    // M5.Lcd.printf(" AutoRotation: %s", this->_isAutoRotation ? "true" : "false");
+    // M5.Lcd.println();
+    msg = " AutoRotation: " + String(this->_isAutoRotation ? "true" : "false");
+    prtln(msg);
+
     if (o.hasOwnProperty(KEY_ORIENTATION)) {
         JSONVar orientationVar = o[KEY_ORIENTATION];
         if (JSON.typeof(orientationVar) == "number") {
@@ -537,7 +539,7 @@ bool ImageViewer::parse(const char* config) {
     return true;
 }
 
-// -------------------------------------------------------------
+// -----add by NoRi 2024-06-24 -----------------------------------------------
 bool SdBegin() {
     // --- SD begin -------
     int i = 0;
