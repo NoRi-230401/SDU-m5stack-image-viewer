@@ -1,5 +1,25 @@
 #include "ImageViewer.hpp"
 
+// ----------------------------------------------------------------------------
+#include <ESP32-targz.h>
+#include <M5StackUpdater.h>
+#define APP_VER   "SDU-imageViewer-v201-230624"
+#define APP_NAME  "SDU-imageViewer"  // app Name
+#define APP_BIN   "/21_imgView.bin"  // app bin file-name
+#define TIMEOUT00 5000               // lobby countdouwn timeout : msec
+#define D1_SERI   1
+#define D2_DISP   2
+#define D3_BOTH   3
+int SDCARD_CS_PIN = 4;
+void setupSDUpdater(const char* appName);
+bool SdBegin();
+void prt(String sData, int direction = D3_BOTH);
+void prtln(String sData, int direction = D3_BOTH);
+void POWER_OFF();
+void REBOOT();
+// ----------------------------------------------------------------------------
+
+
 #if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
 #include "M5Encoder.hpp"
 
@@ -90,8 +110,10 @@ inline void M5_UPDATE(void) {
 
 inline int32_t getDirection(void) {
     if (M5.BtnA.wasClicked()) {
+        prtln("BtnA was Clicked!", D1_SERI);
         return 1;
     } else if (M5.BtnC.wasClicked()) {
+        prtln("BtnC was Clicked!", D1_SERI);
         return -1;
     } else {
         return 0;
@@ -118,22 +140,22 @@ inline int32_t getTextAreaHeight(void) {
 #include <Arduino_JSON.h>
 #include <string.h>
 // ----------------------------------------------------------------------------
-#include <ESP32-targz.h>
-#include <M5StackUpdater.h>
-#define APP_VER   "SDU-imageViewer-v201-230624"
-#define APP_NAME  "SDU-imageViewer"  // app Name
-#define APP_BIN   "/21_imgView.bin"  // app bin file-name
-#define TIMEOUT00 5000               // lobby countdouwn timeout : msec
-#define D1_SERI   1
-#define D2_DISP   2
-#define D3_BOTH   3
-int SDCARD_CS_PIN = 4;
-void setupSDUpdater(const char* appName);
-bool SdBegin();
-void prt(String sData, int direction = D3_BOTH);
-void prtln(String sData, int direction = D3_BOTH);
-void POWER_OFF();
-void REBOOT();
+// #include <ESP32-targz.h>
+// #include <M5StackUpdater.h>
+// #define APP_VER   "SDU-imageViewer-v201-230624"
+// #define APP_NAME  "SDU-imageViewer"  // app Name
+// #define APP_BIN   "/21_imgView.bin"  // app bin file-name
+// #define TIMEOUT00 5000               // lobby countdouwn timeout : msec
+// #define D1_SERI   1
+// #define D2_DISP   2
+// #define D3_BOTH   3
+// int SDCARD_CS_PIN = 4;
+// void setupSDUpdater(const char* appName);
+// bool SdBegin();
+// void prt(String sData, int direction = D3_BOTH);
+// void prtln(String sData, int direction = D3_BOTH);
+// void POWER_OFF();
+// void REBOOT();
 // ----------------------------------------------------------------------------
 const char* ImageViewer::VERSION = "v105-mod-V201";
 const char* ImageViewer::DEFAULT_CONFIG_NAME = "imgView.json";
@@ -213,9 +235,9 @@ bool ImageViewer::begin(int bgColor) {
 
     // M5.Lcd.printf("Image Viewer %s", VERSION);
     // M5.Lcd.println();
-    String msg = "Image Viewer " + String(VERSION) ;
+    String msg = "Image Viewer " + String(VERSION);
     prtln(msg);
-    
+
     if (!parse()) {
         return false;
     }
@@ -223,7 +245,7 @@ bool ImageViewer::begin(int bgColor) {
     M5_UPDATE();
     // M5.Lcd.println("Mode:");
     prtln("Mode:");
-    
+
     if (M5.BtnA.isPressed()) {
         this->_isAutoMode = true;  // overriding the setting
         // M5.Lcd.println(" Auto(Forced)");
@@ -252,7 +274,6 @@ bool ImageViewer::begin(int bgColor) {
             this->_isAutoRotation = false;
             // M5.Lcd.println(" No(IMU disabled)");
             prtln(" No(IMU disabled)");
-
         }
     } else {
         // M5.Lcd.println(" No");
@@ -362,6 +383,9 @@ bool ImageViewer::updateOrientation(float threshold) {
 
 void ImageViewer::showImage(const String images[], size_t p) {
     const char* filename = images[p].c_str();
+    String msg = "showImage FileName = " + String(filename);
+    prtln(msg, D1_SERI);
+
     M5.Lcd.startWrite();
     if (isJpeg(filename)) {
         M5.Lcd.drawJpgFile(filename, 0, 0, M5.Display.width(),
@@ -376,8 +400,10 @@ void ImageViewer::showImage(const String images[], size_t p) {
                            M5.Display.height(), 0, 0, 0.0F, 0.0F,
                            middle_center);
     } else {
-        M5.Lcd.printf("ignore: %s", filename);
-        M5.Lcd.println();
+        // M5.Lcd.printf("ignore: %s", filename);
+        // M5.Lcd.println();
+        String msg2 = "ignore: " + String(filename);
+        prtln(msg2);
     }
     M5.Lcd.endWrite();
 }
