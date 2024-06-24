@@ -142,8 +142,8 @@ inline int32_t getTextAreaHeight(void) {
 // -----mode by NoRi 2024-06-24 -----------------------------------------------
 const char* ImageViewer::VERSION = "v105-mod-V202";
 const char* ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
-String ImageViewer::ROOT_DIR("/data");
-const char* ImageViewer::KEY_ROOT_DIR  = "RootDir";
+String ImageViewer::DATA_DIR("/data");
+const char* ImageViewer::KEY_DATA_DIR = "DataDir";
 // ----------------------------------------------------------------------------
 // const char* ImageViewer::VERSION = "v1.0.5";
 // const char* ImageViewer::DEFAULT_CONFIG_NAME = "image-viewer.json";
@@ -320,14 +320,14 @@ bool ImageViewer::update(void) {
 bool ImageViewer::setImageFileList(const String& path) {
     File root = IV_FS.open(path.c_str(), "r");
     if (!root and !root.isDirectory()) {
-        // M5.Lcd.printf("Failed to open \"%s\"", ROOT_DIR);
+        // M5.Lcd.printf("Failed to open \"%s\"", DATA_DIR);
         // M5.Lcd.println();
-        String msg = "Failed to open \"" + ROOT_DIR + "\"";
+        String msg = "Failed to open \"" + DATA_DIR + "\"";
         prtln(msg);
         return false;
     } else {
         String msg =
-            "Success to open image data folder :  \"" + ROOT_DIR + "\"";
+            "Success to open image data folder :  \"" + DATA_DIR + "\"";
         prtln(msg);
     }
 
@@ -335,8 +335,8 @@ bool ImageViewer::setImageFileList(const String& path) {
     while (f && this->_nImageFiles < MAX_IMAGE_FILES) {
         if (!f.isDirectory() && isImageFile(f)) {
             // ---- mod by NoRi ---
-            // this->_imageFiles[this->_nImageFiles] = ROOT_DIR + f.name();
-            this->_imageFiles[this->_nImageFiles] = ROOT_DIR + "/" + f.name();
+            // this->_imageFiles[this->_nImageFiles] = DATA_DIR + f.name();
+            this->_imageFiles[this->_nImageFiles] = DATA_DIR + "/" + f.name();
             // -----------------------------------------------------------------
             ++this->_nImageFiles;
         }
@@ -458,7 +458,7 @@ bool ImageViewer::parse(const char* config) {
         return false;
     }
 
-    // const String filename = ROOT_DIR + config;
+    // const String filename = DATA_DIR + config;
     const String filename = config;
 
     if (!IV_FS.exists(filename)) {
@@ -546,15 +546,15 @@ bool ImageViewer::parse(const char* config) {
     M5.Lcd.printf(" Orientation: %s", getOrientationString(this->_orientation));
     M5.Lcd.println();
 
-    // --- ROOT_DIR ---
-    if (o.hasOwnProperty(KEY_ROOT_DIR)) {
-        String getStr1 = JSON.stringify(o[KEY_ROOT_DIR]);
-        prtln("getStr1 = " + getStr1);
+    // --- DATA_DIR ---
+    if (o.hasOwnProperty(KEY_DATA_DIR)) {
+        String getStr1 = JSON.stringify(o[KEY_DATA_DIR]);
+        // prtln("getStr1 = " + getStr1);
         int len = getStr1.length();
-        String getStr2 = getStr1.substring(1, len-1);
-        prtln("getStr2 = " + getStr2);
-        ROOT_DIR = getStr2;
-        prtln("ROOT_DIR = " + ROOT_DIR);
+        String getStr2 = getStr1.substring(1, len - 1);
+        // prtln("getStr2 = " + getStr2);
+        DATA_DIR = getStr2;
+        prtln("DATA_DIR = " + DATA_DIR);
     }
 
     return true;

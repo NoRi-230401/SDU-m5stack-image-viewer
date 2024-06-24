@@ -45,7 +45,7 @@ public:
     static const char* KEY_AUTO_MODE_RANDOMIZED;
     static const char* KEY_AUTO_ROTATION;
     static const char* KEY_ORIENTATION;
-    static const char* KEY_ROOT_DIR;
+    static const char* KEY_DATA_DIR;
 
     static const size_t MAX_IMAGE_FILES = 50;
     static const bool DEFAULT_AUTO_MODE = false;
@@ -56,7 +56,7 @@ public:
     static const uint32_t FILE_LIST_DISPLAY_INTERVAL_MS = 100;
 
     static const float GRAVITY_THRESHOLD;
-    static String ROOT_DIR;
+    static String DATA_DIR;
 
     ImageViewer(bool isAutoMode = DEFAULT_AUTO_MODE,
                 uint32_t autoModeInterval = DEFAULT_AUTO_MODE_INTERVAL_MS,
@@ -70,7 +70,7 @@ public:
     virtual bool updateOrientation(float threshold = GRAVITY_THRESHOLD);
 
 protected:
-    virtual bool setImageFileList(const String& path = ROOT_DIR);
+    virtual bool setImageFileList(const String& path = DATA_DIR);
     virtual void showImage(const String images[], size_t p);
     virtual bool hasExt(const char* filename, const char* ext) const;
     virtual bool isJpeg(const char* filename) const;
