@@ -135,18 +135,25 @@ void prtln(String sData, int direction = D3_BOTH);
 void POWER_OFF();
 void REBOOT();
 // ----------------------------------------------------------------------------
-
-const char* ImageViewer::VERSION = "v1.0.5";
-
-const char* ImageViewer::DEFAULT_CONFIG_NAME = "image-viewer.json";
+const char* ImageViewer::VERSION = "v105-Sv201";
+const char* ImageViewer::DEFAULT_CONFIG_NAME = "imgView.json";
+// const char* ImageViewer::KEY_AUTO_MODE = "AutoMode";
+// const char* ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
+// const char* ImageViewer::KEY_AUTO_MODE_RANDOMIZED = "AutoModeRandomized";
+// const char* ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
+// const char* ImageViewer::KEY_ORIENTATION = "Orientation";
+// const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
+const String ImageViewer::ROOT_DIR("/app/imgView");
+// ----------------------------------------------------------------------------
+// const char* ImageViewer::VERSION = "v1.0.5";
+// const char* ImageViewer::DEFAULT_CONFIG_NAME = "image-viewer.json";
 const char* ImageViewer::KEY_AUTO_MODE = "AutoMode";
 const char* ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
 const char* ImageViewer::KEY_AUTO_MODE_RANDOMIZED = "AutoModeRandomized";
 const char* ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
 const char* ImageViewer::KEY_ORIENTATION = "Orientation";
-
 const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
-const String ImageViewer::ROOT_DIR("/data");
+// const String ImageViewer::ROOT_DIR("/data");
 
 static const bool FORMAT_FS_IF_FAILED = true;
 static const char* EXT_JPG = ".jpg";
