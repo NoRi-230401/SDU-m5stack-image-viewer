@@ -1,4 +1,5 @@
 #include "ImageViewer.hpp"
+#include "SDU.hpp"
 
 #if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
 #include "M5Encoder.hpp"
