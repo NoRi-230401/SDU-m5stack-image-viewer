@@ -1,5 +1,4 @@
 #include "ImageViewer.hpp"
-#include "SDU.hpp"
 
 #if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
 #include "M5Encoder.hpp"
@@ -118,6 +117,24 @@ inline int32_t getTextAreaHeight(void) {
 
 #include <Arduino_JSON.h>
 #include <string.h>
+// ----------------------------------------------------------------------------
+#include <ESP32-targz.h>
+#include <M5StackUpdater.h>
+#define APP_VER   "SDU-imageViewer-230623"
+#define APP_NAME  "SDU-imageViewer"  // app Name
+#define APP_BIN   "/21_imgView.bin"  // app bin file-name
+#define TIMEOUT00 5000               // lobby countdouwn timeout : msec
+#define D1_SERI   1
+#define D2_DISP   2
+#define D3_BOTH   3
+int SDCARD_CS_PIN = 4;
+void setupSDUpdater(const char* appName);
+bool SdBegin();
+void prt(String sData, int direction = D3_BOTH);
+void prtln(String sData, int direction = D3_BOTH);
+void POWER_OFF();
+void REBOOT();
+// ----------------------------------------------------------------------------
 
 const char* ImageViewer::VERSION = "v1.0.5";
 
@@ -158,6 +175,11 @@ ImageViewer::~ImageViewer(void) {
 bool ImageViewer::begin(int bgColor) {
     M5_BEGIN();
 
+    // -- SDUpdater Lobby Screen by NoRi ----------
+    SDCARD_CS_PIN = (int)M5.getPin(m5::sd_spi_cs);
+    setupSDUpdater(APP_NAME);
+    // ---------------------------------------------
+
     this->_orientation = M5.Lcd.getRotation();
 #if defined(ARDUINO_M5STACK_CARDPUTER)  // TODO: removed when M5GFX v0.1.16 is
                                         // released
@@ -175,10 +197,17 @@ bool ImageViewer::begin(int bgColor) {
     M5.Lcd.setScrollRect(getTextAreaX(), getTextAreaY(), getTextAreaWidth(),
                          getTextAreaHeight());
 
-    if (!IV_FS.begin(FORMAT_FS_IF_FAILED)) {
-        M5.Lcd.println("Failed to mount File System");
+    // ------ NoRi ----------------------------------
+    // if (!IV_FS.begin(FORMAT_FS_IF_FAILED)) {
+    //     M5.Lcd.println("Failed to mount File System");
+    //     return false;
+    // }
+    if (!SdBegin()) {
+        prtln("Failed SD File System");
         return false;
     }
+    // ----------------------------------------------------
+
     M5.Lcd.setFileStorage(IV_FS);
 
     M5.Lcd.printf("Image Viewer %s", VERSION);
@@ -457,4 +486,89 @@ bool ImageViewer::parse(const char* config) {
     M5.Lcd.printf(" Orientation: %s", getOrientationString(this->_orientation));
     M5.Lcd.println();
     return true;
+}
+
+// -------------------------------------------------------------
+bool SdBegin() {
+    // --- SD begin -------
+    int i = 0;
+    bool success = false;
+    prtln("SD.begin Start", D1_SERI);
+
+    while (i < 3) {  // SDカードマウント待ち
+        success = SD.begin(SDCARD_CS_PIN, SPI, 4000000U, "/sd", 10U, false);
+        if (success)
+            return true;
+
+        prtln("SD Wait...", D1_SERI);
+        delay(500);
+        i++;
+    }
+
+    if (i >= 3) {
+        prtln("SD.begin faile", D3_BOTH);
+        return false;
+    } else
+        return true;
+}
+
+void prt(String sData, int direction) {
+    switch (direction) {
+        case D3_BOTH:
+            M5.Log.print(sData.c_str());
+            M5.Display.print(sData.c_str());
+            break;
+
+        case D2_DISP:
+            M5.Display.print(sData.c_str());
+            break;
+
+        case D1_SERI:
+            M5.Log.print(sData.c_str());
+            break;
+
+        default:
+            break;
+    }
+}
+
+void prtln(String sData, int direction) {
+    String strData = sData + "\n";
+    prt(strData, direction);
+}
+
+void setupSDUpdater(const char* appName) {
+    SDUCfg.setLabelMenu("< Menu");  // load menu.bin
+    SDUCfg.setLabelSkip("Skip");    // skip the lobby countdown and run the app
+    SDUCfg.setAppName(appName);     // lobby screen label: application name
+    checkSDUpdater(SD,              // filesystem (default=SD)
+                   MENU_BIN,        // path to binary (default=/menu.bin, empty
+                                    // string=rollback only)
+                   TIMEOUT00,  // wait delay, (default=0, will be forced to 2000
+                               // upon ESP.restart() )
+                   SDCARD_CS_PIN);
+}
+
+void POWER_OFF() {
+    prtln("\nPOWER_OFF", D3_BOTH);
+    //   SPIFFS.end();
+    SD.end();
+
+    delay(3000);
+    M5.Power.powerOff();
+    for (;;) {
+        delay(10);
+    }
+}
+
+void REBOOT() {
+    prtln("\nREBOOT", D3_BOTH);
+    //   SPIFFS.end();
+    SD.end();
+
+    delay(3000);
+    ESP.restart();
+    for (;;) {
+        delay(10);
+    }
 }
