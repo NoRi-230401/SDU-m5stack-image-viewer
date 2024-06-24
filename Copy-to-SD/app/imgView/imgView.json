@@ -2,5 +2,6 @@
   "AutoMode": false,
   "AutoModeInterval": 5000,
   "AutoModeRandomized": false,
+  "RootDir" : "/app/imgView",
   "AutoRotation": true
 }

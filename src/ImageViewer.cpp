@@ -140,9 +140,10 @@ inline int32_t getTextAreaHeight(void) {
 #include <string.h>
 
 // -----mode by NoRi 2024-06-24 -----------------------------------------------
-const char* ImageViewer::VERSION = "v105-mod-V201";
+const char* ImageViewer::VERSION = "v105-mod-V202";
 const char* ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
-const String ImageViewer::ROOT_DIR("/app/imgView");
+String ImageViewer::ROOT_DIR("/data");
+const char* ImageViewer::KEY_ROOT_DIR  = "RootDir";
 // ----------------------------------------------------------------------------
 // const char* ImageViewer::VERSION = "v1.0.5";
 // const char* ImageViewer::DEFAULT_CONFIG_NAME = "image-viewer.json";
@@ -152,9 +153,8 @@ const char* ImageViewer::KEY_AUTO_MODE_RANDOMIZED = "AutoModeRandomized";
 const char* ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
 const char* ImageViewer::KEY_ORIENTATION = "Orientation";
 const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
-// const String ImageViewer::ROOT_DIR("/data");
-
-static const bool FORMAT_FS_IF_FAILED = true;
+// const String ImageViewer::ROOT_DIR("/");
+// static const bool FORMAT_FS_IF_FAILED = true;
 static const char* EXT_JPG = ".jpg";
 static const char* EXT_JPEG = ".jpeg";
 static const char* EXT_BMP = ".bmp";
@@ -325,13 +325,12 @@ bool ImageViewer::setImageFileList(const String& path) {
         String msg = "Failed to open \"" + ROOT_DIR + "\"";
         prtln(msg);
         return false;
-    }
-    else
-    {
-        String msg = "Success to open image data folder :  \"" + ROOT_DIR + "\"";
+    } else {
+        String msg =
+            "Success to open image data folder :  \"" + ROOT_DIR + "\"";
         prtln(msg);
     }
-    
+
     File f = root.openNextFile();
     while (f && this->_nImageFiles < MAX_IMAGE_FILES) {
         if (!f.isDirectory() && isImageFile(f)) {
@@ -458,10 +457,10 @@ bool ImageViewer::parse(const char* config) {
         prtln("config is null");
         return false;
     }
-    
+
     // const String filename = ROOT_DIR + config;
     const String filename = config;
-    
+
     if (!IV_FS.exists(filename)) {
         // M5_LOGW("%s is not found", filename.c_str());
         String msg = filename + " is not found";
@@ -497,7 +496,7 @@ bool ImageViewer::parse(const char* config) {
     // M5.Lcd.printf(" AutoMode: %s", this->_isAutoMode ? "true" : "false");
     // M5.Lcd.println();
 
-    msg = " AutoMode: " + String( this->_isAutoMode ? "true" : "false" );
+    msg = " AutoMode: " + String(this->_isAutoMode ? "true" : "false");
     prtln(msg);
 
     if (o.hasOwnProperty(KEY_AUTO_MODE_INTERVAL)) {
@@ -505,21 +504,22 @@ bool ImageViewer::parse(const char* config) {
     }
     // M5.Lcd.printf(" Interval: %dms", this->_autoModeInterval);
     // M5.Lcd.println();
-    msg = " Interval: " + String( this->_autoModeInterval,10);
+    msg = " Interval: " + String(this->_autoModeInterval, 10);
     prtln(msg);
     if (o.hasOwnProperty(KEY_AUTO_MODE_RANDOMIZED)) {
         this->_isAutoModeRandomized = (bool)o[KEY_AUTO_MODE_RANDOMIZED];
     }
-    // M5.Lcd.printf(" Randomized: %s", this->_isAutoModeRandomized ? "true" : "false");
-    // M5.Lcd.println();
-    msg = " Randomized: " + String(this->_isAutoModeRandomized ? "true" : "false");
+    // M5.Lcd.printf(" Randomized: %s", this->_isAutoModeRandomized ? "true" :
+    // "false"); M5.Lcd.println();
+    msg = " Randomized: " +
+          String(this->_isAutoModeRandomized ? "true" : "false");
     prtln(msg);
 
     if (o.hasOwnProperty(KEY_AUTO_ROTATION)) {
         this->_isAutoRotation = (bool)o[KEY_AUTO_ROTATION];
     }
-    // M5.Lcd.printf(" AutoRotation: %s", this->_isAutoRotation ? "true" : "false");
-    // M5.Lcd.println();
+    // M5.Lcd.printf(" AutoRotation: %s", this->_isAutoRotation ? "true" :
+    // "false"); M5.Lcd.println();
     msg = " AutoRotation: " + String(this->_isAutoRotation ? "true" : "false");
     prtln(msg);
 
@@ -545,6 +545,18 @@ bool ImageViewer::parse(const char* config) {
     }
     M5.Lcd.printf(" Orientation: %s", getOrientationString(this->_orientation));
     M5.Lcd.println();
+
+    // --- ROOT_DIR ---
+    if (o.hasOwnProperty(KEY_ROOT_DIR)) {
+        String getStr1 = JSON.stringify(o[KEY_ROOT_DIR]);
+        prtln("getStr1 = " + getStr1);
+        int len = getStr1.length();
+        String getStr2 = getStr1.substring(1, len-1);
+        prtln("getStr2 = " + getStr2);
+        ROOT_DIR = getStr2;
+        prtln("ROOT_DIR = " + ROOT_DIR);
+    }
+
     return true;
 }
 
