@@ -146,7 +146,7 @@ const char* ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
 const char* ImageViewer::KEY_ORIENTATION = "Orientation";
 
 const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
-const String ImageViewer::ROOT_DIR("/");
+const String ImageViewer::ROOT_DIR("/data");
 
 static const bool FORMAT_FS_IF_FAILED = true;
 static const char* EXT_JPG = ".jpg";
@@ -301,26 +301,34 @@ bool ImageViewer::update(void) {
 bool ImageViewer::setImageFileList(const String& path) {
     File root = IV_FS.open(path.c_str(), "r");
     if (!root and !root.isDirectory()) {
-        M5.Lcd.printf("Failed to open \"%s\"", ROOT_DIR);
-        M5.Lcd.println();
+        // M5.Lcd.printf("Failed to open \"%s\"", ROOT_DIR);
+        // M5.Lcd.println();
+        String msg = "Failed to open \"" + ROOT_DIR + "\"";
+        prtln(msg);
         return false;
     }
     File f = root.openNextFile();
     while (f && this->_nImageFiles < MAX_IMAGE_FILES) {
         if (!f.isDirectory() && isImageFile(f)) {
-            this->_imageFiles[this->_nImageFiles] = ROOT_DIR + f.name();
+            // ---- mod by NoRi ---
+            // this->_imageFiles[this->_nImageFiles] = ROOT_DIR + f.name();
+            this->_imageFiles[this->_nImageFiles] = ROOT_DIR + "/" + f.name();
+            // -----------------------------------------------------------------
             ++this->_nImageFiles;
         }
         f = root.openNextFile();
     }
     if (this->_nImageFiles == 0) {
-        M5.Lcd.println("No image files found");
+        // M5.Lcd.println("No image files found");
+        prtln("No image files found");
         return false;
     }
     M5.Lcd.println("Image Files:");
     for (size_t c = 0; c < this->_nImageFiles; ++c) {
-        M5.Lcd.print(" ");
-        M5.Lcd.println(this->_imageFiles[c]);
+        // M5.Lcd.print(" ");
+        // M5.Lcd.println(this->_imageFiles[c]);
+        String msg = " " + String(this->_imageFiles[c]);
+        prtln(msg);
         delay(FILE_LIST_DISPLAY_INTERVAL_MS);
     }
     return true;
