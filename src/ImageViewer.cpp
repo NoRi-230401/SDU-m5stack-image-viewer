@@ -111,10 +111,12 @@ inline void M5_UPDATE(void) {
 inline int32_t getDirection(void) {
     if (M5.BtnA.wasClicked()) {
         // prtln("BtnA was Clicked!", D1_SERI);
-        return 1;
+        // return 1;
+        return -1;
     } else if (M5.BtnC.wasClicked()) {
         // prtln("BtnC was Clicked!", D1_SERI);
-        return -1;
+        // return -1;
+        return 1;
     } else {
         return 0;
     }
@@ -377,7 +379,7 @@ bool ImageViewer::isAutoMode() {
 }
 
 void ImageViewer::setAutoMode(bool mode) {
-    _isAutoMode=mode;
+    _isAutoMode = mode;
 }
 
 void ImageViewer::showImage(const String images[], size_t p) {
@@ -668,13 +670,10 @@ void REBOOT() {
     }
 }
 
-
-void loadMenu(void)
-{
+void loadMenu(void) {
     updateFromFS(SD);
 }
 
-void saveBin(void)
-{
-   saveSketchToFS(SD, APP_BIN);
+void saveBin(void) {
+    saveSketchToFS(SD, APP_BIN);
 }

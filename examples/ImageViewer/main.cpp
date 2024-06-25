@@ -99,9 +99,9 @@ void MD00_disp() {
     M5.Display.fillScreen(BLACK);
     M5.Display.setTextScroll(true);
     M5.Display.printf("***  SDU-imageViewer  ***\n\n\n");
-    M5.Display.printf("(BtnA)click: NEXT image\n\n");
+    M5.Display.printf("(BtnA)click: PREV image\n\n");
     M5.Display.printf("(BtnB)hold : Special Mode\n\n");
-    M5.Display.printf("(BtnC)click: PREV image\n");
+    M5.Display.printf("(BtnC)click: NEXT image\n");
 }
 
 void MDxx_disp(int mode) {
