@@ -68,6 +68,10 @@ public:
     virtual bool update(void);
 
     virtual bool updateOrientation(float threshold = GRAVITY_THRESHOLD);
+    
+    // ------------ Add by NoRi ------
+    virtual bool isAutoMode();
+    virtual void setAutoMode(bool mode);
 
 protected:
     virtual bool setImageFileList(const String& path = DATA_DIR);

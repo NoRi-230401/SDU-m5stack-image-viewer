@@ -17,6 +17,7 @@ void prt(String sData, int direction = D3_BOTH);
 void prtln(String sData, int direction = D3_BOTH);
 void POWER_OFF();
 void REBOOT();
+// bool AUTOMODE_ST;
 // ----------------------------------------------------------------------------
 
 #if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
@@ -142,7 +143,7 @@ inline int32_t getTextAreaHeight(void) {
 // -----mode by NoRi 2024-06-24 -----------------------------------------------
 const char* ImageViewer::VERSION = "v105-mod-V202";
 const char* ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
-String ImageViewer::DATA_DIR("/data");
+String ImageViewer::DATA_DIR("/Pictures");
 const char* ImageViewer::KEY_DATA_DIR = "DataDir";
 // ----------------------------------------------------------------------------
 // const char* ImageViewer::VERSION = "v1.0.5";
@@ -284,6 +285,8 @@ bool ImageViewer::begin(int bgColor) {
         showImage(this->_imageFiles, this->_pos);
     }
 
+    // AUTOMODE_ST = this->_isAutoMode;
+
     return true;
 }
 
@@ -367,6 +370,14 @@ bool ImageViewer::updateOrientation(float threshold) {
         return true;
     }
     return false;
+}
+
+bool ImageViewer::isAutoMode() {
+    return _isAutoMode;
+}
+
+void ImageViewer::setAutoMode(bool mode) {
+    _isAutoMode=mode;
 }
 
 void ImageViewer::showImage(const String images[], size_t p) {
@@ -571,121 +582,7 @@ bool ImageViewer::parse(const char* config) {
 #define MD_END 4     //
 extern int MODE_ST;  // mode status
 
-void MDxx_BtnChk();
-void doWork(int mode);
-void MD00_disp();
-void MDxx_disp(int mode);
-
-void MDxx_BtnChk() {
-    if (M5.BtnA.wasClicked()) {
-        prtln("BtnA Cliked! [EXIT]", D1_SERI);
-        MD00_disp();
-        MODE_ST = MD00;  // -- normal mode
-        delay(100);
-    } else if (M5.BtnB.wasClicked()) {
-        prtln("BtnB Cliked!  [OK]", D1_SERI);
-        doWork(MODE_ST);
-        MDxx_disp(MODE_ST);
-    } else if (M5.BtnC.wasClicked()) {
-        prtln("BtnC Cliked!  [NEXT]", D1_SERI);
-        MODE_ST++;
-        if (MODE_ST > MD_END)
-            MODE_ST = MD01;
-
-        MDxx_disp(MODE_ST);
-    }
-}
-
-void MD00_disp() {
-    M5.Display.setTextFont(1);
-    M5.Display.setTextSize(2);
-    M5.Display.setTextColor(WHITE, BLACK);
-    M5.Display.setTextDatum(0);
-    M5.Display.setCursor(0, 0);
-    M5.Display.fillScreen(BLACK);
-    M5.Display.setTextScroll(true);
-    M5.Display.printf("***  SDU-imageViewer  ***\n\n\n");
-    M5.Display.printf("(BtnA)click: NEXT image\n\n");
-    M5.Display.printf("(BtnB)hold : Special Mode\n\n");
-    M5.Display.printf("(BtnC)click: PREV image\n");
-}
-
-void MDxx_disp(int mode) {
-    M5.Display.setTextFont(1);
-    M5.Display.setTextSize(2);
-    M5.Display.setTextColor(TFT_WHITE, TFT_BLUE);
-    M5.Display.fillScreen(BLUE);
-    M5.Display.setTextDatum(0);
-    M5.Display.setCursor(0, 0);
-    M5.Display.setTextScroll(false);
-
-    M5.Display.printf("**  Special Mode %d/%d  **\n\n", MODE_ST, MD_END);
-    String msg = "";
-    switch (MODE_ST) {
-        case MD01:
-            // if (WD_FILE_SYSTEM == FS_SD)
-            //     msg = "FileSystem SD -> SPIFFS";
-            // else
-            //     msg = "FileSystem SPIFFS -> SD";
-
-            break;
-
-        case MD02:
-            msg = "Load SD-Updater menu.bin";
-            break;
-
-        case MD03:
-            msg = "Store bin-file to SD";
-            break;
-
-        case MD04:
-            msg = "Power Off";
-            break;
-
-        default:
-            break;
-    }
-    prtln(msg, D2_DISP);
-
-    M5.Display.printf("\n\n\n(BtnA)click:    EXIT\n\n");
-    M5.Display.printf("(BtnB)click:    OK\n\n");
-    M5.Display.print("(BtnC)click:    NEXT\n");
-}
-
-void doWork(int mode) {
-    switch (mode) {
-        case MD01:
-            // M5.Log.println("FileSystem change");
-            // if (WD_FILE_SYSTEM == FS_SD)
-            //     setFileSystemNVM(FS_SPIFFS);
-            // else
-            //     setFileSystemNVM(FS_SD);
-            // REBOOT();
-            break;
-
-        case MD02:
-            M5.Log.println("Will Load menu binary");
-            updateFromFS(SD);
-            for (;;) {
-                delay(10);
-            }
-            // REBOOT();
-            break;
-
-        case MD03:
-            M5.Log.println("Will store BIN_FILE to SD");
-            saveSketchToFS(SD, APP_BIN);
-            delay(500);
-            break;
-
-        case MD04:
-            POWER_OFF();
-            break;
-
-        default:
-            break;
-    }
-}
+// void MDxx_BtnChk();
 
 bool SdBegin() {
     // --- SD begin -------
@@ -769,4 +666,15 @@ void REBOOT() {
     for (;;) {
         delay(10);
     }
+}
+
+
+void loadMenu(void)
+{
+    updateFromFS(SD);
+}
+
+void saveBin(void)
+{
+   saveSketchToFS(SD, APP_BIN);
 }
