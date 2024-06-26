@@ -301,10 +301,10 @@ bool ImageViewer::update(void) {
 
     const uint32_t t = millis();
     int32_t direction = getDirection();
-    if (direction == 0 && this->_isAutoMode &&
-        t - this->_prevUpdate >= this->_interval) {
+    if (direction == 0 && this->_isAutoMode && t - this->_prevUpdate >= this->_interval) {
         direction = 1;
     }
+
     if (direction != 0) {
         this->_prevUpdate = t;
         if (direction < 0 && this->_pos == 0) {
@@ -514,11 +514,15 @@ bool ImageViewer::parse(const char* config) {
 
     if (o.hasOwnProperty(KEY_AUTO_MODE_INTERVAL)) {
         this->_autoModeInterval = (uint32_t)o[KEY_AUTO_MODE_INTERVAL];
+        this->_interval = _autoModeInterval;
     }
     // M5.Lcd.printf(" Interval: %dms", this->_autoModeInterval);
     // M5.Lcd.println();
-    msg = " Interval: " + String(this->_autoModeInterval, 10);
+    msg = " AutoModeInterval: " + String(this->_autoModeInterval, 10);
     prtln(msg);
+    msg = "_Interval: " + String(this->_interval, 10);
+    prtln(msg);
+
     if (o.hasOwnProperty(KEY_AUTO_MODE_RANDOMIZED)) {
         this->_isAutoModeRandomized = (bool)o[KEY_AUTO_MODE_RANDOMIZED];
     }
