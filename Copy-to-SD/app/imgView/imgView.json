@@ -3,6 +3,6 @@
   "AutoModeInterval": 5000,
   "AutoModeRandomized": false,
   "AutoRotation": true,
-	"DataDir" : "/app/imgView/Pictures"
+	"DataDir" : "/Pictures"
 }
 

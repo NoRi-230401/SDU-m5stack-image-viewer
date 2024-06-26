@@ -10,7 +10,7 @@
 #define D1_SERI   1
 #define D2_DISP   2
 #define D3_BOTH   3
-int SDCARD_CS_PIN = 4;
+// int SDCARD_CS_PIN = 4;
 void setupSDUpdater(const char* appName);
 bool SdBegin();
 void prt(String sData, int direction = D3_BOTH);
@@ -111,12 +111,10 @@ inline void M5_UPDATE(void) {
 
 inline int32_t getDirection(void) {
     if (M5.BtnA.wasClicked()) {
-        // prtln("BtnA was Clicked!", D1_SERI);
-        // return 1;
+        prtln("BtnA was Clicked!", D1_SERI);
         return -1;
     } else if (M5.BtnC.wasClicked()) {
-        // prtln("BtnC was Clicked!", D1_SERI);
-        // return -1;
+        prtln("BtnC was Clicked!", D1_SERI);
         return 1;
     } else {
         return 0;
@@ -186,7 +184,7 @@ bool ImageViewer::begin(int bgColor) {
     M5_BEGIN();
 
     // -- SDUpdater Lobby Screen by NoRi ----------
-    SDCARD_CS_PIN = (int)M5.getPin(m5::sd_spi_cs);
+    // SDCARD_CS_PIN = (int)M5.getPin(m5::sd_spi_cs);
     setupSDUpdater(APP_NAME);
     // ---------------------------------------------
 
@@ -213,15 +211,13 @@ bool ImageViewer::begin(int bgColor) {
     //     return false;
     // }
     if (!SdBegin()) {
-        prtln("Failed SD File System");
+        prtln("Failed to mount SD File System");
         return false;
     }
     // ----------------------------------------------------
 
     M5.Lcd.setFileStorage(IV_FS);
 
-    // M5.Lcd.printf("Image Viewer %s", VERSION);
-    // M5.Lcd.println();
     String msg = "Image Viewer " + String(VERSION);
     prtln(msg);
 
@@ -230,25 +226,19 @@ bool ImageViewer::begin(int bgColor) {
     }
 
     M5_UPDATE();
-    // M5.Lcd.println("Mode:");
-    prtln("Mode:");
 
+    prtln("Mode:");
     if (M5.BtnA.isPressed()) {
         this->_isAutoMode = true;  // overriding the setting
-        // M5.Lcd.println(" Auto(Forced)");
         prtln(" Auto(Forced)");
     } else {
-        // M5.Lcd.println(this->_isAutoMode ? " Auto" : " Manual");
         String msg = String(this->_isAutoMode ? " Auto" : " Manual");
         prtln(msg);
     }
 
-    // M5.Lcd.println("Rotation:");
     prtln("Rotation:");
-
     if (this->_isAutoRotation) {
         if (M5.Imu.isEnabled()) {
-            // M5.Lcd.println(" Auto");
             prtln(" Auto");
             if (M5.getBoard() == m5::board_t::board_M5Stack ||
                 M5.getBoard() == m5::board_t::board_M5StackCoreS3 ||
@@ -259,11 +249,9 @@ bool ImageViewer::begin(int bgColor) {
             }
         } else {
             this->_isAutoRotation = false;
-            // M5.Lcd.println(" No(IMU disabled)");
             prtln(" No(IMU disabled)");
         }
     } else {
-        // M5.Lcd.println(" No");
         prtln(" No");
     }
 
@@ -287,8 +275,6 @@ bool ImageViewer::begin(int bgColor) {
     if (!this->_isAutoMode) {
         showImage(this->_imageFiles, this->_pos);
     }
-
-    // AUTOMODE_ST = this->_isAutoMode;
 
     return true;
 }
@@ -327,8 +313,6 @@ bool ImageViewer::update(void) {
 bool ImageViewer::setImageFileList(const String& path) {
     File root = IV_FS.open(path.c_str(), "r");
     if (!root and !root.isDirectory()) {
-        // M5.Lcd.printf("Failed to open \"%s\"", DATA_DIR);
-        // M5.Lcd.println();
         String msg = "Failed to open \"" + DATA_DIR + "\"";
         prtln(msg);
         return false;
@@ -349,15 +333,26 @@ bool ImageViewer::setImageFileList(const String& path) {
         }
         f = root.openNextFile();
     }
+    
     if (this->_nImageFiles == 0) {
-        // M5.Lcd.println("No image files found");
         prtln("No image files found");
         return false;
+    } else {
+        //  --- sort -------------------------------------------
+        size_t N = this->_nImageFiles;
+        for (int i = 0; i < N - 1; ++i) {
+            for (int j = 0; j < N - 1; ++j) {
+                if (this->_imageFiles[j] > this->_imageFiles[j + 1]) {
+                    // swap 
+                    String tmp = this->_imageFiles[j];
+                    this->_imageFiles[j] = this->_imageFiles[j+1];
+                    this->_imageFiles[j+1] = tmp;
+                }
+            }
+        }
     }
     M5.Lcd.println("Image Files:");
     for (size_t c = 0; c < this->_nImageFiles; ++c) {
-        // M5.Lcd.print(" ");
-        // M5.Lcd.println(this->_imageFiles[c]);
         String msg = " " + String(this->_imageFiles[c]);
         prtln(msg);
         delay(FILE_LIST_DISPLAY_INTERVAL_MS);
@@ -468,29 +463,21 @@ uint8_t ImageViewer::detectOrientation(float threshold) {
 
 bool ImageViewer::parse(const char* config) {
     if (config == nullptr) {
-        // M5_LOGE("config is null");
         prtln("config is null");
         return false;
     }
-
-    // const String filename = DATA_DIR + config;
     const String filename = config;
 
     if (!IV_FS.exists(filename)) {
-        // M5_LOGW("%s is not found", filename.c_str());
         String msg = filename + " is not found";
         prtln(msg);
         return true;  // use default
     }
-    // M5.Lcd.println("Config:");
-    // M5.Lcd.printf(" %s", filename.c_str());
-    // M5.Lcd.println();
     String msg = "Config: " + filename;
     prtln(msg);
 
     File f = IV_FS.open(filename, "r");
     if (!f) {
-        // M5.Lcd.println(" E: failed to open");
         String msg = " E: failed to open";
         prtln(msg);
         return false;
@@ -501,16 +488,12 @@ bool ImageViewer::parse(const char* config) {
 
     JSONVar o = JSON.parse((const char*)buf);
     if (JSON.typeof(o) == "undefined") {
-        // M5.Lcd.println(" E: parse");
         prtln(" E: parse");
         return false;
     }
     if (o.hasOwnProperty(KEY_AUTO_MODE)) {
         this->_isAutoMode = (bool)o[KEY_AUTO_MODE];
     }
-    // M5.Lcd.printf(" AutoMode: %s", this->_isAutoMode ? "true" : "false");
-    // M5.Lcd.println();
-
     msg = " AutoMode: " + String(this->_isAutoMode ? "true" : "false");
     prtln(msg);
 
@@ -518,8 +501,6 @@ bool ImageViewer::parse(const char* config) {
         this->_autoModeInterval = (uint32_t)o[KEY_AUTO_MODE_INTERVAL];
         this->_interval = _autoModeInterval;
     }
-    // M5.Lcd.printf(" Interval: %dms", this->_autoModeInterval);
-    // M5.Lcd.println();
     msg = " AutoModeInterval: " + String(this->_autoModeInterval, 10);
     prtln(msg);
     msg = "_Interval: " + String(this->_interval, 10);
@@ -528,8 +509,6 @@ bool ImageViewer::parse(const char* config) {
     if (o.hasOwnProperty(KEY_AUTO_MODE_RANDOMIZED)) {
         this->_isAutoModeRandomized = (bool)o[KEY_AUTO_MODE_RANDOMIZED];
     }
-    // M5.Lcd.printf(" Randomized: %s", this->_isAutoModeRandomized ? "true" :
-    // "false"); M5.Lcd.println();
     msg = " Randomized: " +
           String(this->_isAutoModeRandomized ? "true" : "false");
     prtln(msg);
@@ -537,8 +516,6 @@ bool ImageViewer::parse(const char* config) {
     if (o.hasOwnProperty(KEY_AUTO_ROTATION)) {
         this->_isAutoRotation = (bool)o[KEY_AUTO_ROTATION];
     }
-    // M5.Lcd.printf(" AutoRotation: %s", this->_isAutoRotation ? "true" :
-    // "false"); M5.Lcd.println();
     msg = " AutoRotation: " + String(this->_isAutoRotation ? "true" : "false");
     prtln(msg);
 
@@ -568,10 +545,8 @@ bool ImageViewer::parse(const char* config) {
     // --- DATA_DIR ---
     if (o.hasOwnProperty(KEY_DATA_DIR)) {
         String getStr1 = JSON.stringify(o[KEY_DATA_DIR]);
-        // prtln("getStr1 = " + getStr1);
         int len = getStr1.length();
         String getStr2 = getStr1.substring(1, len - 1);
-        // prtln("getStr2 = " + getStr2);
         DATA_DIR = getStr2;
         prtln("DATA_DIR = " + DATA_DIR);
     }
@@ -580,15 +555,15 @@ bool ImageViewer::parse(const char* config) {
 }
 
 // -----add by NoRi 2024-06-24 -----------------------------------------------
-#define MDM2   -2    // init
-#define MDM1   -1    // setup start
-#define MD00   0     // setup don (Normal mode)
-#define MD01   1     // MD01  FileSystem change
-#define MD02   2     // MD02  load menu.bin
-#define MD03   3     // MD03  save bin to SD
-#define MD04   4     // MD04  power off
-#define MD_END 4     //
-extern int MODE_ST;  // mode status
+// #define MDM2   -2    // init
+// #define MDM1   -1    // setup start
+// #define MD00   0     // setup don (Normal mode)
+// #define MD01   1     // MD01  FileSystem change
+// #define MD02   2     // MD02  load menu.bin
+// #define MD03   3     // MD03  save bin to SD
+// #define MD04   4     // MD04  power off
+// #define MD_END 4     //
+// extern int MODE_ST;  // mode status
 
 bool SdBegin() {
     // --- SD begin -------
@@ -597,7 +572,8 @@ bool SdBegin() {
     prtln("SD.begin Start", D1_SERI);
 
     while (i < 3) {  // SDカードマウント待ち
-        success = SD.begin(SDCARD_CS_PIN, SPI, 4000000U, "/sd", 10U, false);
+        success = SD.begin((int)M5.getPin(m5::sd_spi_cs), SPI, 4000000U, "/sd",
+                           10U, false);
         if (success)
             return true;
 
@@ -647,7 +623,7 @@ void setupSDUpdater(const char* appName) {
                                     // string=rollback only)
                    TIMEOUT00,  // wait delay, (default=0, will be forced to 2000
                                // upon ESP.restart() )
-                   SDCARD_CS_PIN);
+                   (int)M5.getPin(m5::sd_spi_cs));
 }
 
 void FOREVER_LOOP() {
