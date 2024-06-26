@@ -15,6 +15,7 @@ void setupSDUpdater(const char* appName);
 bool SdBegin();
 void prt(String sData, int direction = D3_BOTH);
 void prtln(String sData, int direction = D3_BOTH);
+void FOREVER_LOOP();
 void POWER_OFF();
 void REBOOT();
 // bool AUTOMODE_ST;
@@ -301,7 +302,8 @@ bool ImageViewer::update(void) {
 
     const uint32_t t = millis();
     int32_t direction = getDirection();
-    if (direction == 0 && this->_isAutoMode && t - this->_prevUpdate >= this->_interval) {
+    if (direction == 0 && this->_isAutoMode &&
+        t - this->_prevUpdate >= this->_interval) {
         direction = 1;
     }
 
@@ -588,8 +590,6 @@ bool ImageViewer::parse(const char* config) {
 #define MD_END 4     //
 extern int MODE_ST;  // mode status
 
-// void MDxx_BtnChk();
-
 bool SdBegin() {
     // --- SD begin -------
     int i = 0;
@@ -650,28 +650,30 @@ void setupSDUpdater(const char* appName) {
                    SDCARD_CS_PIN);
 }
 
+void FOREVER_LOOP() {
+    while (true) {
+        delay(10);
+    }
+}
+
 void POWER_OFF() {
-    prtln("\nPOWER_OFF", D3_BOTH);
+    prtln("\n\n*** POWER_OFF ***", D3_BOTH);
     //   SPIFFS.end();
     SD.end();
 
     delay(3000);
     M5.Power.powerOff();
-    for (;;) {
-        delay(10);
-    }
+    FOREVER_LOOP();
 }
 
 void REBOOT() {
-    prtln("\nREBOOT", D3_BOTH);
+    prtln("\n\n*** REBOOT ***", D3_BOTH);
     //   SPIFFS.end();
     SD.end();
 
     delay(3000);
     ESP.restart();
-    for (;;) {
-        delay(10);
-    }
+    FOREVER_LOOP();
 }
 
 void loadMenu(void) {

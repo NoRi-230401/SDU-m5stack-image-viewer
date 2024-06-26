@@ -23,6 +23,7 @@ extern void POWER_OFF();
 extern void REBOOT();
 extern void MDxx_BtnChk();
 extern void MDxx_disp(int mode);
+extern void FOREVER_LOOP();
 
 void MDxx_BtnChk();
 void doWork(int mode);
@@ -45,36 +46,29 @@ void setup(void) {
     MODE_ST = MD00;
 }
 
-// extern bool AUTOMODE_ST;
 void loop(void) {
     M5.update();
 
     if (MODE_ST == MD00) {
         if (M5.BtnB.wasHold()) {
-            // AUTOMODE_ST = viewer.isAutoMode();
             prtln("BtnB was Hold ,  goto Special Mode", D1_SERI);
             MODE_ST = MD01;  // Special Mode in
             MDxx_disp(MODE_ST);
             delay(100);
         } else
             viewer.update();
-
-    } else if ((MODE_ST > MD00) && (MODE_ST <= MD_END))
-    {
+    } else if ((MODE_ST > MD00) && (MODE_ST <= MD_END)) {
         MDxx_BtnChk();
     }
 
-    // delay(100);
     delay(20);
 }
-
 
 void MDxx_BtnChk() {
     if (M5.BtnA.wasClicked()) {
         prtln("BtnA Cliked! [EXIT]", D1_SERI);
         MD00_disp();
         MODE_ST = MD00;  // -- normal mode
-        delay(100);
     } else if (M5.BtnB.wasClicked()) {
         prtln("BtnB Cliked!  [OK]", D1_SERI);
         doWork(MODE_ST);
@@ -88,7 +82,6 @@ void MDxx_BtnChk() {
         MDxx_disp(MODE_ST);
     }
 }
-
 
 void MD00_disp() {
     M5.Display.setTextFont(1);
@@ -117,7 +110,6 @@ void MDxx_disp(int mode) {
     String msg = "";
     switch (MODE_ST) {
         case MD01:
-            // if (AUTOMODE_ST)
             if (viewer.isAutoMode())
                 msg = "AutoMode : ON  -> OFF";
             else
@@ -129,7 +121,7 @@ void MDxx_disp(int mode) {
             break;
 
         case MD03:
-            msg = "Store bin-file to SD";
+            msg = "Save bin-file to SD";
             break;
 
         case MD04:
@@ -150,22 +142,16 @@ void doWork(int mode) {
     switch (mode) {
         case MD01:
             viewer.setAutoMode(!viewer.isAutoMode());
-            // ImageViewer.setAutoMode();
             break;
 
         case MD02:
-            M5.Log.println("Will Load menu binary");
-            // updateFromFS(SD);
+            prtln("Will Load SD-Updater menu.bin", D1_SERI);
             loadMenu();
-            for (;;) {
-                delay(10);
-            }
-            // REBOOT();
+            FOREVER_LOOP();
             break;
 
         case MD03:
-            M5.Log.println("Will store BIN_FILE to SD");
-            // saveSketchToFS(SD, APP_BIN);
+            prtln("Will Save bin_file to SD", D1_SERI);
             saveBin();
             delay(500);
             break;
