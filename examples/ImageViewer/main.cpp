@@ -5,12 +5,12 @@
 #define MDM2   -2    // init
 #define MDM1   -1    // setup start
 #define MD00   0     // setup don (Normal mode)
-#define MD01   1     // MD01  FileSystem change
+#define MD01   1     // MD01  AutoMode On/Off
 #define MD02   2     // MD02  load menu.bin
 #define MD03   3     // MD03  save bin to SD
 #define MD04   4     // MD04  power off
 #define MD_END 4     //
-int MODE_ST = MDM2;  // mode status
+int MODE_ST = MDM2;  // mode status = init  
 #define D1_SERI 1
 #define D2_DISP 2
 #define D3_BOTH 3
@@ -106,7 +106,7 @@ void MDxx_disp(int mode) {
     M5.Display.setCursor(0, 0);
     M5.Display.setTextScroll(false);
 
-    M5.Display.printf("**  Special Mode %d/%d  **\n\n", MODE_ST, MD_END);
+    M5.Display.printf("***  Special Mode %d/%d  ***\n\n", MODE_ST, MD_END);
     String msg = "";
     switch (MODE_ST) {
         case MD01:

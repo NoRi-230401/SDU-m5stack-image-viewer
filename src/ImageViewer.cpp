@@ -351,7 +351,8 @@ bool ImageViewer::setImageFileList(const String& path) {
             }
         }
     }
-    M5.Lcd.println("Image Files:");
+
+    prtln("Image Files:");
     for (size_t c = 0; c < this->_nImageFiles; ++c) {
         String msg = " " + String(this->_imageFiles[c]);
         prtln(msg);
