@@ -200,10 +200,17 @@ bool ImageViewer::begin(int bgColor) {
     M5.Lcd.setEpdMode(epd_mode_t::epd_quality);
 #endif
 
-    M5.Lcd.setTextScroll(true);
-    M5.Lcd.setCursor(getTextAreaX(), getTextAreaY());
-    M5.Lcd.setScrollRect(getTextAreaX(), getTextAreaY(), getTextAreaWidth(),
-                         getTextAreaHeight());
+    // M5.Lcd.setTextScroll(true);
+    // M5.Lcd.setCursor(getTextAreaX(), getTextAreaY());
+    // M5.Lcd.setScrollRect(getTextAreaX(), getTextAreaY(), getTextAreaWidth(),
+    //                      getTextAreaHeight());
+
+    M5.Display.setFont(&fonts::DejaVu18);
+    M5.Display.setTextColor(WHITE, BLACK);
+    M5.Display.setTextDatum(0);
+    M5.Display.setCursor(0, 0);
+    M5.Display.fillScreen(TFT_BLACK);
+    M5.Display.setTextScroll(true);
 
     // ------ NoRi ----------------------------------
     // if (!IV_FS.begin(FORMAT_FS_IF_FAILED)) {
@@ -333,7 +340,7 @@ bool ImageViewer::setImageFileList(const String& path) {
         }
         f = root.openNextFile();
     }
-    
+
     if (this->_nImageFiles == 0) {
         prtln("No image files found");
         return false;
@@ -343,10 +350,10 @@ bool ImageViewer::setImageFileList(const String& path) {
         for (int i = 0; i < N - 1; ++i) {
             for (int j = 0; j < N - 1; ++j) {
                 if (this->_imageFiles[j] > this->_imageFiles[j + 1]) {
-                    // swap 
+                    // swap
                     String tmp = this->_imageFiles[j];
-                    this->_imageFiles[j] = this->_imageFiles[j+1];
-                    this->_imageFiles[j+1] = tmp;
+                    this->_imageFiles[j] = this->_imageFiles[j + 1];
+                    this->_imageFiles[j + 1] = tmp;
                 }
             }
         }
