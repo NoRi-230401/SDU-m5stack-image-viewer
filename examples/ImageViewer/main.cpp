@@ -3,8 +3,8 @@
 // clang-format on
 
 void setup_MDxx(int mode);
-void setup_MDxx(int mode);
 void loop_MDxx(void);
+void disp_init();
 
 #define MDM2   -2    // init
 #define MDM1   -1    // setup start
@@ -25,10 +25,10 @@ extern void loadMenu(void);
 extern void saveBin(void);
 extern void POWER_OFF();
 extern void REBOOT();
-extern void MDxx_BtnChk();
+// extern void MDxx_BtnChk();
 extern void FOREVER_LOOP();
-
-void MDxx_BtnChk();
+void MD00_disp();
+// void MDxx_BtnChk();
 void doWork(int mode);
 
 String get_MDxx_msg(int mode);
@@ -41,8 +41,17 @@ void forever(void) {
     }
 }
 
+extern void sdu_lobby();
+
 void setup(void) {
     MODE_ST = MDM1;
+    auto cfg = M5.config();
+    M5.begin(cfg);
+    sdu_lobby();
+    disp_init();
+    M5.Display.setTextScroll(true);
+    delay(500);
+
     if (!viewer.begin()) {
         forever();
     }
@@ -52,16 +61,22 @@ void setup(void) {
 void loop(void) {
     if (MODE_ST == MD00) {
         M5.update();
-
         if (M5.BtnB.wasHold()) {
             prtln("BtnB was Hold ,  goto Special Mode", D1_SERI);
-            MODE_ST = MD01;  // Special Mode in
+
+            // 何故か１回目の文字が乱れるのでDUMMYを入れ２回呼び出す。
+            // MODE_ST = MD_END;    // *** DUMMY ****
+            // setup_MDxx(MD_END);  // **************
+            MODE_ST = MD01;  // menu mode in
+            disp_init();
             setup_MDxx(MD01);
-            delay(1000);
+            delay(500);
         } else {
             viewer.update();
-            delay(20);
+            delay(10);
         }
+
+        delay(1);
     } else {
         loop_MDxx();
     }
@@ -86,19 +101,25 @@ void loop(void) {
 //     }
 // }
 
-// void MD00_disp() {
-//     M5.Display.setTextFont(1);
-//     M5.Display.setTextSize(2);
-//     M5.Display.setTextColor(WHITE, BLACK);
-//     M5.Display.setTextDatum(0);
-//     M5.Display.setCursor(0, 0);
-//     M5.Display.fillScreen(BLACK);
-//     M5.Display.setTextScroll(true);
-//     M5.Display.printf("***  SDU-imageViewer  ***\n\n\n");
-//     M5.Display.printf("(BtnA)click: PREV image\n\n");
-//     M5.Display.printf("(BtnB)hold : Special Mode\n\n");
-//     M5.Display.printf("(BtnC)click: NEXT image\n");
-// }
+void MD00_disp() {
+    // M5.Display.setTextFont(1);
+    // M5.Display.setTextSize(2);
+    // M5.Display.fillScreen(BLACK);
+
+    disp_init();
+    // M5.Display.fillScreen(TFT_BLACK);
+    // M5.Display.setFont(&fonts::DejaVu18);
+    // M5.Display.setTextColor(WHITE, BLACK);
+    // M5.Display.setTextDatum(0);
+    // M5.Display.setCursor(0, 0);
+
+    M5.Display.setTextScroll(true);
+    M5.Display.printf("***  SDU-imageViewer  ***\n\n\n");
+    M5.Display.printf("(BtnA)click: PREV image\n\n");
+    M5.Display.printf("(BtnB)hold : Special Mode\n\n");
+    M5.Display.printf("(BtnC)click: NEXT image\n");
+    // delay(1000);
+}
 
 String get_MDxx_msg(int mode) {
     String msg = "";
@@ -169,10 +190,50 @@ static int menu_padding = 36;
 
 static void func_hello() {
     // for (int i = 0; i < 128; ++i) {
-    //     M5.Display.drawString("hello", rand() % M5.Display.width(),
-    //                           rand() % M5.Display.height());
-    // }
+    for (int i = 0; i < 5; ++i) {
+        M5.Display.drawString("hello", rand() % M5.Display.width(),
+                              rand() % M5.Display.height());
+    }
 }
+
+static void func01_on() {
+    prtln("AutoMode set on", D1_SERI);
+    viewer.setAutoMode(true);
+    M5.Display.drawString("AutoMode -> ON", 220, 120);
+    delay(100);
+}
+
+static void func01_off() {
+    prtln("AutoMode set off", D1_SERI);
+    viewer.setAutoMode(false);
+    M5.Display.drawString("AutoMode -> OFF", 220, 120);
+    delay(100);
+}
+
+static void func02_SDU_menu() {
+    prtln("Will Load SD-Updater menu.bin", D1_SERI);
+    M5.Display.drawString("Menu.bin", 220, 120);
+    delay(3000);
+    loadMenu();
+    FOREVER_LOOP();
+}
+
+static void func03_SDU_saveBin() {
+    prtln("Will Save bin_file to SD", D1_SERI);
+    M5.Display.drawString("save bin", 220, 120);
+    delay(3000);
+    saveBin();
+    delay(500);
+}
+
+static void func04_PowerOff() {
+    prtln("PowerOff", D1_SERI);
+    M5.Display.drawString("PowerOff", 240, 120);
+    delay(3000);
+    M5.Power.powerOff();
+    FOREVER_LOOP;
+}
+
 static void func_rect() {
     int w = M5.Display.width() >> 3;
     int h = M5.Display.height() >> 3;
@@ -226,28 +287,27 @@ struct menu_item_t
 
 /// メニュー01の定義
 static const menu_item_t menu01[] = {
-    {"hello", func_hello},
-    {"rect", func_rect},
-    {"line", func_line},
-    {"circle", func_circle},
+    {"on", func01_on}, {"off", func01_off}, {"hello", func_hello},
+    //  {"line", func_line},
+    // {"circle", func_circle},
     // {"triangle", func_triangle},
     //  {"arc", func_arc},
 };
 /// メニュー02の定義
 static const menu_item_t menu02[] = {
-    {"hello", func_hello},
-    {"rect", func_rect},
-    {"line", func_line},
+    {"SDU-menu", func02_SDU_menu},
+    // {"rect", func_rect},
+    // {"line", func_line},
 };
 /// メニュー03の定義
 static const menu_item_t menu03[] = {
-    {"hello", func_hello},
-    {"rect", func_rect},
+    {"SaveBin", func03_SDU_saveBin},
+    // {"rect", func_rect},
 };
 
 /// メニュー04の定義
 static const menu_item_t menu04[] = {
-    {"hello", func_hello},
+    {"PowerOff", func04_PowerOff},
 };
 
 /// メニュー01の要素数
@@ -351,12 +411,12 @@ void move_menu(bool back = false) {
 
 void exec_menu(bool holding) {
     // holding は長押し中とそれ以外で処理を変えたい場合に利用できる。
-    if (holding == false) {
-        // M5.Speaker.tone(880, 150);
-        prtln("exec_menu : holding is false : cliced!", D1_SERI);
-    } else {
-        prtln("exec_menu : holding is true : hold!", D1_SERI);
-    }
+    // if (holding == false) {
+    //     // M5.Speaker.tone(880, 150);
+    //     prtln("exec_menu : holding is false : cliced!", D1_SERI);
+    // } else {
+    //     prtln("exec_menu : holding is true : hold!", D1_SERI);
+    // }
 
     switch (MODE_ST) {
         case MD01:
@@ -429,31 +489,39 @@ size_t get_menu_count(int mode) {
     return tmp;
 }
 
+void disp_init() {
+    M5.Display.endWrite();
+
+    M5.Display.fillScreen(TFT_BLACK);  // 画面クリア
+    M5.Display.setRotation(1);
+    M5.Display.setTextSize(1.0);
+    M5.Display.setFont(&fonts::DejaVu18);           // フォントセット
+    M5.Display.setTextColor(TFT_WHITE, TFT_BLACK);  // 描画色、背景色を設定。
+    M5.Display.setTextDatum(0);
+    M5.Display.setCursor(0, 0);  // カーソルセット
+    M5.Display.setTextScroll(false);
+    M5.Display.setTextWrap(false);     // テキスト自動折返し
+    M5.Display.fillScreen(TFT_BLACK);  // 画面クリア
+
+    delay(20);
+
+    // M5.Display.startWrite();
+    // M5.Display.setEpdMode(epd_mode_t::epd_fastest);
+}
+
 void setup_MDxx(int mode) {
-    if (mode == MD00) {
-        M5.Display.setFont(&fonts::DejaVu18);
-        M5.Display.setTextColor(WHITE, BLACK);
-        M5.Display.setTextDatum(0);
-        M5.Display.setCursor(0, 0);
-        M5.Display.fillScreen(TFT_BLACK);
-        M5.Display.setTextScroll(true);
-        M5.Display.printf("***  SDU-imageViewer  ***\n\n\n");
-        M5.Display.printf("(BtnA)click: PREV image\n\n");
-        M5.Display.printf("(BtnB)hold : Special Mode\n\n");
-        M5.Display.printf("(BtnC)click: NEXT image\n");
-        delay(1000);
-        return;
-    }
+    M5.Display.fillScreen(TFT_BLACK);
+    delay(20);
 
     cursor_index = 0;
-    menu_w = M5.Display.width() >> 1;
-    M5.Display.setFont(&fonts::DejaVu18);
+    // M5.Display.setFont(&fonts::DejaVu18);
 
+    menu_w = M5.Display.width() >> 1;
     menu_count = get_menu_count(mode);
-    menu_padding = 40;
-    menu_h = menu_padding - 2;
+    menu_padding = 50;
+    menu_h = menu_padding - 10;
     menu_x = 0;
-    menu_y = 42;
+    menu_y = 50;
 
     prtln("mode = " + String(mode, 10), D1_SERI);
     prtln("menu_x = " + String(menu_x, 10), D1_SERI);
@@ -465,9 +533,8 @@ void setup_MDxx(int mode) {
 
     /// このサンプルでは、startWriteをしたまま、対になるendWriteを使わないようにする。
     M5.Display.startWrite();
-
     M5.Display.setEpdMode(epd_mode_t::epd_fastest);
-    M5.Display.fillScreen(TFT_BLACK);
+    // M5.Display.fillScreen(TFT_BLACK);
 
     M5.Display.setCursor(menu_x, 0);
     String msg = "MENU  " + String(mode, 10) + " / " + String(MD_END, 10);
@@ -477,16 +544,8 @@ void setup_MDxx(int mode) {
     msg = get_MDxx_msg(mode);
     M5.Display.print(msg.c_str());
 
-    msg = "prev";
-    M5.Display.setCursor(0, M5.Display.height() - 20);
-    M5.Display.print(msg.c_str());
-
-    msg = "exit";
-    M5.Display.setCursor(M5.Display.width() / 2 - 20, M5.Display.height() - 20);
-    M5.Display.print(msg.c_str());
-
-    msg = "next";
-    M5.Display.setCursor(M5.Display.width() - 45, M5.Display.height() - 20);
+    msg = "prev             exit             next";
+    M5.Display.setCursor(0, M5.Display.height() - 30);
     M5.Display.print(msg.c_str());
 
     for (size_t i = 0; i < menu_count; i++) {
@@ -498,18 +557,20 @@ void setup_MDxx(int mode) {
 void loop_MDxx(void) {
     /// ディスプレイがビジー状態でない場合のみ処理する。
     /// EPDでは画面の更新中はBusyとなるためここを通らない。
-    if (!M5.Display
-             .displayBusy()) {  // 選択しているメニューが変更されていれば再描画。
-        static size_t prev_index = 0;
-        if (prev_index != cursor_index) {
-            draw_menu(prev_index, false);
-            draw_menu(cursor_index, true);
-            prev_index = cursor_index;
-        }
-        /// 表示内容を画面に反映する。
-        M5.Display.display();
-        /// ※ M5Paper, CoreInk, Unit OLED についてはここで画面が更新される。
-    }
+    // if (!M5.Display.displayBusy()) {
+    //     // 選択しているメニューが変更されていれば再描画。
+
+    //     static size_t prev_index = 0;
+    //     if (prev_index != cursor_index) {
+    //         draw_menu(prev_index, false);
+    //         draw_menu(cursor_index, true);
+    //         prev_index = cursor_index;
+    //     }
+    //     /// 表示内容を画面に反映する。
+    //     M5.Display.display();
+    //     /// ※ M5Paper, CoreInk, Unit OLED についてはここで画面が更新される。
+    // }
+
     {  /// 10ミリ秒間隔で処理が進むように待機する。
         static uint32_t prev_ms;
         uint32_t ms = M5.millis();
@@ -531,12 +592,15 @@ void loop_MDxx(void) {
             if (index < menu_count) {
                 if (detail.wasPressed()) {
                     select_menu(index);
+                    ;
                 } else if (index == cursor_index) {
                     if (detail.wasClicked()) {
                         exec_menu(false);
-                    } else if (detail.isHolding()) {
-                        exec_menu(true);
                     }
+                    // else if (detail.isHolding()) {
+                    //     // exec_menu(true);
+                    //     ;
+                    // }
                 }
             }
         }
@@ -545,75 +609,26 @@ void loop_MDxx(void) {
     if (M5.BtnA.wasClicked()) {
         prtln("BtnA Cliked! [prev]", D1_SERI);
         MODE_ST--;
-        if (MODE_ST <= MD00)
+        if (MODE_ST < MD01)
             MODE_ST = MD_END;
+
+        disp_init();
         setup_MDxx(MODE_ST);
 
     } else if (M5.BtnC.wasClicked()) {
-        prtln("BtnC Cliked!  [NEXT]", D1_SERI);
+        prtln("BtnC Cliked!  [next]", D1_SERI);
         MODE_ST++;
         if (MODE_ST > MD_END)
             MODE_ST = MD01;
+
+        disp_init();
         setup_MDxx(MODE_ST);
 
     } else if (M5.BtnB.wasClicked()) {
-        prtln("BtnB Cliked!  [OK]", D1_SERI);
+        prtln("BtnB Cliked!  [exit]", D1_SERI);
         MODE_ST = MD00;
-        setup_MDxx(MD00);
+        disp_init();
+        MD00_disp();
+        delay(1000);
     }
-
-    // switch (M5.getBoard()) {
-    //     default:
-    //         if (M5.BtnA.wasClicked()) {
-    //             move_menu(false);
-    //         }
-    //         if (M5.BtnA.wasHold()) {
-    //             exec_menu(false);
-    //         }
-    //         if (M5.BtnA.isHolding()) {
-    //             exec_menu(true);
-    //         }
-    //         break;
-
-    //     case m5::board_t::board_M5StickC:
-    //     case m5::board_t::board_M5StickCPlus:
-    //         if (M5.BtnPWR.wasClicked()) {
-    //             move_menu(false);
-    //         }
-    //         if (M5.BtnB.wasClicked()) {
-    //             move_menu(true);
-    //         }
-    //         if (M5.BtnA.wasClicked()) {
-    //             exec_menu(false);
-    //         }
-    //         if (M5.BtnA.wasHold()) {
-    //             exec_menu(false);
-    //         }
-    //         if (M5.BtnA.isHolding()) {
-    //             exec_menu(true);
-    //         }
-    //         break;
-
-    //     case m5::board_t::board_M5Stack:
-    //     case m5::board_t::board_M5StackCore2:
-    //     case m5::board_t::board_M5Tough:
-    //     case m5::board_t::board_M5StackCoreInk:
-    //     case m5::board_t::board_M5Paper:
-    //     case m5::board_t::board_M5Station:
-    //         if (M5.BtnA.wasClicked() || M5.BtnA.wasHold()) {
-    //             move_menu(true);
-    //         }
-    //         if (M5.BtnC.wasClicked() || M5.BtnC.wasHold()) {
-    //             move_menu(false);
-    //         }
-    //         if (M5.BtnB.wasClicked()) {
-    //             exec_menu(false);
-    //         }
-    //         if (M5.BtnB.wasHold()) {
-    //             exec_menu(false);
-    //         }
-    //         if (M5.BtnB.isHolding()) {
-    //             exec_menu(true);
-    //         }
-    // }
 }

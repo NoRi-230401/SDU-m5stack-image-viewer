@@ -181,11 +181,10 @@ ImageViewer::~ImageViewer(void) {
 }
 
 bool ImageViewer::begin(int bgColor) {
-    M5_BEGIN();
-
+    // M5_BEGIN();
     // -- SDUpdater Lobby Screen by NoRi ----------
     // SDCARD_CS_PIN = (int)M5.getPin(m5::sd_spi_cs);
-    setupSDUpdater(APP_NAME);
+    // setupSDUpdater(APP_NAME);
     // ---------------------------------------------
 
     this->_orientation = M5.Lcd.getRotation();
@@ -205,12 +204,12 @@ bool ImageViewer::begin(int bgColor) {
     // M5.Lcd.setScrollRect(getTextAreaX(), getTextAreaY(), getTextAreaWidth(),
     //                      getTextAreaHeight());
 
-    M5.Display.setFont(&fonts::DejaVu18);
-    M5.Display.setTextColor(WHITE, BLACK);
-    M5.Display.setTextDatum(0);
-    M5.Display.setCursor(0, 0);
-    M5.Display.fillScreen(TFT_BLACK);
-    M5.Display.setTextScroll(true);
+    // M5.Display.setFont(&fonts::DejaVu18);
+    // M5.Display.setTextColor(WHITE, BLACK);
+    // M5.Display.setTextDatum(0);
+    // M5.Display.setCursor(0, 0);
+    // M5.Display.fillScreen(TFT_BLACK);
+    // M5.Display.setTextScroll(true);
 
     // ------ NoRi ----------------------------------
     // if (!IV_FS.begin(FORMAT_FS_IF_FAILED)) {
@@ -622,6 +621,14 @@ void prtln(String sData, int direction) {
     prt(strData, direction);
 }
 
+
+void sdu_lobby();
+
+void sdu_lobby()
+{
+    setupSDUpdater(APP_NAME);
+}
+
 void setupSDUpdater(const char* appName) {
     SDUCfg.setLabelMenu("< Menu");  // load menu.bin
     SDUCfg.setLabelSkip("Skip");    // skip the lobby countdown and run the app
@@ -641,7 +648,7 @@ void FOREVER_LOOP() {
 }
 
 void POWER_OFF() {
-    prtln("\n\n*** POWER_OFF ***", D3_BOTH);
+    prtln("\n\n*** POWER_OFF ***", D1_SERI);
     //   SPIFFS.end();
     SD.end();
 
