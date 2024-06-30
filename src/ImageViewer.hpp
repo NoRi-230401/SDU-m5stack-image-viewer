@@ -1,16 +1,6 @@
-#pragma once
-
-// clang-format off
-
-//---change by NoRi 2024-06-24------------------------
-// #include <LittleFS.h>
-// #define IV_FS LittleFS
 #include <SD.h>
 #define IV_FS SD
-//-----------------------------------------------------
-
 #include <M5Unified.h>
-// clang-format on
 
 class ImageViewer {
 public:
