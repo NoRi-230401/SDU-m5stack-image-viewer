@@ -324,13 +324,14 @@ static const menu_item_t menu01[] = {
 /// メニュー02の定義
 static const menu_item_t menu02[] = {
     {"SDU-menu", func02_SDU_menu},
-    // {"rect", func_rect},
-    // {"line", func_line},
+    {"rect", func_rect},
+    {"line", func_line},
+    {"triangle", func_triangle},
 };
 /// メニュー03の定義
 static const menu_item_t menu03[] = {
     {"SaveBin", func03_SDU_saveBin},
-    // {"rect", func_rect},
+    {"rect", func_rect},
 };
 
 /// メニュー04の定義
@@ -535,50 +536,53 @@ void disp_init() {
     // M5.Display.setEpdMode(epd_mode_t::epd_fastest);
 }
 
+const int M_PADDING[4] = { 70, 60, 50, 40 };
+const int M_H[4] = { 60, 50, 40, 35 };
+const int M_Y[4] = { 70, 60, 50, 50 };
+
 void setup_MDxx(int mode) {
+    String msg = "";
     M5.Display.fillScreen(TFT_BLACK);
     delay(20);
 
     cursor_index = 0;
-    // M5.Display.setFont(&fonts::DejaVu18);
-
-    menu_w = M5.Display.width() >> 1;
     menu_count = get_menu_count(mode);
-    menu_padding = 50;
-    menu_h = menu_padding - 10;
     menu_x = 0;
-    menu_y = 50;
-
+    menu_y = M_Y[menu_count -1 ];
+    menu_w = M5.Display.width() >> 1;
+    menu_h = M_H[menu_count -1];
+    menu_padding = M_PADDING[menu_count -1];
     prtln("mode = " + String(mode, 10), D1_SERI);
+    prtln("menu_count = " + String(menu_count, 10), D1_SERI);
     prtln("menu_x = " + String(menu_x, 10), D1_SERI);
     prtln("menu_y = " + String(menu_y, 10), D1_SERI);
     prtln("menu_w = " + String(menu_w, 10), D1_SERI);
     prtln("menu_h = " + String(menu_h, 10), D1_SERI);
     prtln("menu_padding = " + String(menu_padding, 10), D1_SERI);
-    prtln("menu_count = " + String(menu_count, 10), D1_SERI);
 
     /// このサンプルでは、startWriteをしたまま、対になるendWriteを使わないようにする。
     M5.Display.startWrite();
     M5.Display.setEpdMode(epd_mode_t::epd_fastest);
-    // M5.Display.fillScreen(TFT_BLACK);
 
-    M5.Display.setCursor(menu_x, 0);
-    String msg = "MENU  " + String(mode, 10) + " / " + String(MD_END, 10);
-    M5.Display.print(msg.c_str());
-
-    M5.Display.setCursor(20, 27);
+    // M5.Display.setCursor(20, 27);
     msg = get_MDxx_msg(mode);
-    M5.Display.print(msg.c_str());
+    // M5.Display.print(msg.c_str());
+    M5Disp(msg, 0, 0);
+
+    // M5.Display.setCursor(menu_x, 0);
+    msg = "MENU  " + String(mode, 10) + " / " + String(MD_END, 10);
+    // M5.Display.print(msg.c_str());
+    M5Disp(msg, menu_w + 20, 25);
 
     // msg = "123456789012345678901234567890";
     // M5.Display.setCursor(0, M5.Display.height() - 40);
     // M5.Display.print(msg.c_str());
     msg = "     prev         exit         next";
-    M5.Display.setCursor(0, M5.Display.height() - 20);
-    M5.Display.print(msg.c_str());
+    // M5.Display.setCursor(0, M5.Display.height() - 20);
+    // M5.Display.print(msg.c_str());
+    M5Disp(msg, 0, M5.Display.height() - 20);
 
     for (size_t i = 0; i < menu_count; i++) {
-        // draw_menu(i, i == cursor_index);
         draw_menu(i, false);
     }
 }
