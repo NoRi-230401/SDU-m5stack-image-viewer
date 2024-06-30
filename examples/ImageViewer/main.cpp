@@ -115,10 +115,10 @@ void MD00_disp() {
     // M5.Display.setCursor(0, 0);
 
     M5.Display.setTextScroll(true);
-    M5.Display.printf("***  SDU-imageViewer  ***\n\n\n");
-    M5.Display.printf("(BtnA)click: PREV image\n\n");
-    M5.Display.printf("(BtnB)hold : Special Mode\n\n");
-    M5.Display.printf("(BtnC)click: NEXT image\n");
+    M5.Display.printf("****   SDU-imageViewer   ****\n\n\n");
+    M5.Display.printf("(BtnA)click: prev image\n\n");
+    M5.Display.printf("(BtnB)hold : setting menu\n\n");
+    M5.Display.printf("(BtnC)click: next image\n");
     // delay(1000);
 }
 
@@ -239,8 +239,9 @@ static void func01_off() {
 static void func02_SDU_menu() {
     prtln("Will Load SD-Updater menu.bin", D1_SERI);
     M5Disp(" Load menu.bin", SX1, SY1);
-    
     delay(3000);
+    disp_init();
+    delay(1000);
     loadMenu();
     FOREVER_LOOP();
 }
@@ -249,7 +250,13 @@ static void func03_SDU_saveBin() {
     prtln("Will Save bin_file to SD", D1_SERI);
     M5Disp(" Save bin to SD", SX1, SY1);
     delay(3000);
+    disp_init();
+    delay(500);
     saveBin();
+    delay(500);
+    disp_init();
+    delay(500);
+    setup_MDxx(MD03);
     delay(500);
 }
 
@@ -257,7 +264,6 @@ static void func04_PowerOff() {
     prtln("PowerOff", D1_SERI);
     M5Disp(" Power Off", SX1, SY1);
     delay(3000);
-
     M5.Power.powerOff();
     FOREVER_LOOP;
 }
@@ -315,7 +321,8 @@ struct menu_item_t
 
 /// メニュー01の定義
 static const menu_item_t menu01[] = {
-    {"on", func01_on}, {"off", func01_off}, {"hello", func_hello},
+    {"on", func01_on}, {"off", func01_off}, 
+    // {"hello", func_hello},
     //  {"line", func_line},
     // {"circle", func_circle},
     // {"triangle", func_triangle},
@@ -324,14 +331,14 @@ static const menu_item_t menu01[] = {
 /// メニュー02の定義
 static const menu_item_t menu02[] = {
     {"SDU-menu", func02_SDU_menu},
-    {"rect", func_rect},
-    {"line", func_line},
-    {"triangle", func_triangle},
+    // {"rect", func_rect},
+    // {"line", func_line},
+    // {"triangle", func_triangle},
 };
 /// メニュー03の定義
 static const menu_item_t menu03[] = {
     {"SaveBin", func03_SDU_saveBin},
-    {"rect", func_rect},
+    // {"rect", func_rect},
 };
 
 /// メニュー04の定義
