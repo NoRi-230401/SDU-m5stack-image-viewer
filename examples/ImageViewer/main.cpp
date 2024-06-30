@@ -5,6 +5,7 @@
 void setup_MDxx(int mode);
 void loop_MDxx(void);
 void disp_init();
+void M5Disp(String msg, int32_t x, int32_t y);
 
 #define MDM2   -2    // init
 #define MDM1   -1    // setup start
@@ -203,19 +204,24 @@ static void func_hello() {
 #define SY2 120    //  sy1 + 30
 
 
+
+void M5Disp(String msg, int32_t x, int32_t y)
+{
+    M5.Display.setTextScroll(false);
+    M5.Display.setTextDatum(0);
+    M5.Display.setCursor(x, y);
+    M5.Display.print("                      ");
+    ;
+    M5.Display.setCursor(x, y);
+    M5.Display.print(msg.c_str());
+}
+
 static void func01_on() {
     prtln("AutoMode set on", D1_SERI);
     viewer.setAutoMode(true);
 
-    M5.Display.setTextScroll(false);
-    M5.Display.setTextDatum(0);
-    M5.Display.setCursor(SX1, SY1);
-    M5.Display.print("  AutoMode :    ");
-    M5.Display.setCursor(SX2, SY2);
-    M5.Display.print("      --> ON    ");
-
-    // M5.Display.drawString("AutoMode:  ", SX1, SY1);
-    // M5.Display.drawString("  -->  ON  ", SX2, SY2);
+    M5Disp("  AutoMode", SX1, SY1);
+    M5Disp("        --> ON",SX2,SY2);
 
     delay(100);
 }
@@ -224,22 +230,16 @@ static void func01_off() {
     prtln("AutoMode set off", D1_SERI);
     viewer.setAutoMode(false);
 
-    M5.Display.setTextScroll(false);
-    M5.Display.setTextDatum(0);
-    M5.Display.setCursor(SX1, SY1);
-    M5.Display.print("  AutoMode :    ");
-    M5.Display.setCursor(SX2, SY2);
-    M5.Display.print("      --> OFF ");
-
-    // M5.Display.drawString("AutoMode:  ", SX1, SY1);
-    // M5.Display.drawString("  -->  OFF ", SX2, SY2);
+    M5Disp("  AutoMode", SX1, SY1);
+    M5Disp("        --> OFF",SX2,SY2);
 
     delay(100);
 }
 
 static void func02_SDU_menu() {
     prtln("Will Load SD-Updater menu.bin", D1_SERI);
-    M5.Display.drawString("Menu.bin   ", SX1, SY1);
+    M5Disp(" Load menu.bin", SX1, SY1);
+    
     delay(3000);
     loadMenu();
     FOREVER_LOOP();
@@ -247,7 +247,7 @@ static void func02_SDU_menu() {
 
 static void func03_SDU_saveBin() {
     prtln("Will Save bin_file to SD", D1_SERI);
-    M5.Display.drawString("save bin   ", SX1, SY1);
+    M5Disp(" Save bin to SD", SX1, SY1);
     delay(3000);
     saveBin();
     delay(500);
@@ -255,10 +255,7 @@ static void func03_SDU_saveBin() {
 
 static void func04_PowerOff() {
     prtln("PowerOff", D1_SERI);
-    M5.Display.setTextScroll(false);
-    M5.Display.setTextDatum(0);
-    M5.Display.setCursor(SX1, SY1);
-    M5.Display.print("  Power Off    ");
+    M5Disp(" Power Off", SX1, SY1);
     delay(3000);
 
     M5.Power.powerOff();
