@@ -3,7 +3,6 @@
 #include "sdu.hpp"
 #include "ImageViewer.hpp"
 
-
 void setup_MDxx(int mode);
 void loop_MDxx();
 void disp_init();
@@ -326,9 +325,8 @@ void disp_init()
   M5.Display.setCursor(0, 0); // カーソルセット
   M5.Display.setTextScroll(false);
   M5.Display.setTextWrap(false);    // テキスト自動折返し
-  M5.Display.fillScreen(TFT_BLACK); // 画面クリア
-
-  delay(20);
+  // M5.Display.fillScreen(TFT_BLACK); // 画面クリア
+  // delay(20);
 }
 
 const int M_PADDING[4] = {70, 60, 50, 40};
@@ -339,7 +337,7 @@ void setup_MDxx(int mode)
 {
   String msg = "";
   M5.Display.fillScreen(TFT_BLACK);
-  delay(20);
+  // delay(20);
 
   cursor_index = 0;
   menu_count = get_menu_count(mode);
@@ -357,8 +355,8 @@ void setup_MDxx(int mode)
   prtln("menu_padding = " + String(menu_padding, 10), D1_SERI);
 
   /// このサンプルでは、startWriteをしたまま、対になるendWriteを使わないようにする。
-  M5.Display.startWrite();
-  M5.Display.setEpdMode(epd_mode_t::epd_fastest);
+  // M5.Display.startWrite();
+  // M5.Display.setEpdMode(epd_mode_t::epd_fastest);
 
   msg = get_MDxx_msg(mode);
   M5Disp(msg, 0, 0);
@@ -425,6 +423,7 @@ void loop_MDxx()
 
     disp_init();
     setup_MDxx(MODE_ST);
+    delay(500);
   }
   else if (M5.BtnC.wasClicked())
   {
@@ -435,6 +434,7 @@ void loop_MDxx()
 
     disp_init();
     setup_MDxx(MODE_ST);
+    delay(500);
   }
   else if (M5.BtnB.wasClicked())
   {
@@ -442,7 +442,7 @@ void loop_MDxx()
     MODE_ST = MD00;
     disp_init();
     MD00_disp();
-    delay(1000);
+    delay(500);
   }
 }
 

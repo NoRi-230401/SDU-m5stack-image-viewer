@@ -94,6 +94,7 @@ inline int16_t getDirection(void)
     }
 }
 #else
+
 inline void M5_BEGIN(m5::M5Unified::config_t cfg)
 {
     M5.begin(cfg);
@@ -231,19 +232,19 @@ bool ImageViewer::begin(int bgColor)
         return false;
     }
 
-    M5_UPDATE();
+    // M5_UPDATE();
 
-    prtln("Mode:");
-    if (M5.BtnA.isPressed())
-    {
-        this->_isAutoMode = true; // overriding the setting
-        prtln(" Auto(Forced)");
-    }
-    else
-    {
-        String msg = String(this->_isAutoMode ? " Auto" : " Manual");
-        prtln(msg);
-    }
+    // prtln("Mode:");
+    // if (M5.BtnA.isPressed())
+    // {
+    //     this->_isAutoMode = true; // overriding the setting
+    //     prtln(" Auto(Forced)");
+    // }
+    // else
+    // {
+    //     String msg = String(this->_isAutoMode ? " Auto" : " Manual");
+    //     prtln(msg);
+    // }
 
     prtln("Rotation:");
     if (this->_isAutoRotation)
@@ -304,15 +305,14 @@ bool ImageViewer::update(void)
 {
     // M5_UPDATE();
 
-    if (this->_isAutoRotation && updateOrientation(GRAVITY_THRESHOLD))
-    {
-        showImage(this->_imageFiles, this->_pos);
-    }
+    // if (this->_isAutoRotation && updateOrientation(GRAVITY_THRESHOLD))
+    // {
+    //     showImage(this->_imageFiles, this->_pos);
+    // }
 
     const uint32_t t = millis();
     int32_t direction = getDirection();
-    if (direction == 0 && this->_isAutoMode &&
-        t - this->_prevUpdate >= this->_interval)
+    if (direction == 0 && this->_isAutoMode && (t - this->_prevUpdate >= this->_interval))
     {
         direction = 1;
     }
@@ -332,6 +332,7 @@ bool ImageViewer::update(void)
         {
             this->_pos += direction;
         }
+        
         showImage(this->_imageFiles, this->_pos);
         if (this->_isAutoMode && this->_isAutoModeRandomized)
         {

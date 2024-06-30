@@ -27,9 +27,9 @@ void loop(void) {
     if (MODE_ST == MD00) {
         M5.update();
         if (M5.BtnB.wasHold()) {
-            prtln("BtnB was Hold ,  goto Special Mode", D1_SERI);
+            prtln("BtnB was Hold, go for  SETTING MENU", D1_SERI);
 
-            MODE_ST = MD01;  // menu mode in
+            MODE_ST = MD01;  // menu mode first
             disp_init();
             setup_MDxx(MD01);
             delay(500);
@@ -40,6 +40,6 @@ void loop(void) {
         delay(1);
 
     } else {
-        loop_MDxx();
+        loop_MDxx();    // loop for SETTING MENU
     }
 }

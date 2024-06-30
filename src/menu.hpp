@@ -1,21 +1,22 @@
 #ifndef _MENU_HPP_
 #define _MENU_HPP_
 
-#define D1_SERI   1
-#define D2_DISP   2
-#define D3_BOTH   3
+// print direction for prt() and prtln()
+#define D1_SERI   1    // serial
+#define D2_DISP   2    // display
+#define D3_BOTH   3    // both
 
+// mode status definition 
 #define MDM2   -2    // init
 #define MDM1   -1    // setup start
-#define MD00   0     // setup don (Normal mode)
-#define MD01   1     // MD01  AutoMode On/Off
+#define MD00   0     // setup done (Normal mode)
+#define MD01   1     // MD01  AutoMode
 #define MD02   2     // MD02  load menu.bin
 #define MD03   3     // MD03  save bin to SD
 #define MD04   4     // MD04  power off
-#define MD_END 4     //
-#define D1_SERI 1
-#define D2_DISP 2
-#define D3_BOTH 3
+#define MD_END 4     // end of mode 
+
+// menu disp for function  
 #define SX1 170    // width(320) / 2  + 10
 #define SY1  90    // height(240) / 2 - 30 
 #define SX2 170    //  = sx1 

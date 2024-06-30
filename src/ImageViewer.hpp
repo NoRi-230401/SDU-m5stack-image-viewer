@@ -1,3 +1,6 @@
+#ifndef _IMAGE_VIWER_HPP_
+#define _IMAGE_VIWER_HPP_
+
 #include <SD.h>
 #define IV_FS SD
 #include <M5Unified.h>
@@ -87,3 +90,6 @@ private:
     uint32_t _prevUpdate;
     uint32_t _interval;
 };
+
+// ----------------------------------------------------------------------------
+#endif //_IMAGE_VIEWER_HPP_
