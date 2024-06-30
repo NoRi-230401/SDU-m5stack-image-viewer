@@ -196,23 +196,50 @@ static void func_hello() {
     }
 }
 
+#define SX1 170    // width(320) / 2  + 10
+#define SY1  90    // height(240) / 2 - 30 
+
+#define SX2 170    //  = sx1 
+#define SY2 120    //  sy1 + 30
+
+
 static void func01_on() {
     prtln("AutoMode set on", D1_SERI);
     viewer.setAutoMode(true);
-    M5.Display.drawString("AutoMode -> ON", 220, 120);
+
+    M5.Display.setTextScroll(false);
+    M5.Display.setTextDatum(0);
+    M5.Display.setCursor(SX1, SY1);
+    M5.Display.print("  AutoMode :    ");
+    M5.Display.setCursor(SX2, SY2);
+    M5.Display.print("      --> ON    ");
+
+    // M5.Display.drawString("AutoMode:  ", SX1, SY1);
+    // M5.Display.drawString("  -->  ON  ", SX2, SY2);
+
     delay(100);
 }
 
 static void func01_off() {
     prtln("AutoMode set off", D1_SERI);
     viewer.setAutoMode(false);
-    M5.Display.drawString("AutoMode -> OFF", 220, 120);
+
+    M5.Display.setTextScroll(false);
+    M5.Display.setTextDatum(0);
+    M5.Display.setCursor(SX1, SY1);
+    M5.Display.print("  AutoMode :    ");
+    M5.Display.setCursor(SX2, SY2);
+    M5.Display.print("      --> OFF ");
+
+    // M5.Display.drawString("AutoMode:  ", SX1, SY1);
+    // M5.Display.drawString("  -->  OFF ", SX2, SY2);
+
     delay(100);
 }
 
 static void func02_SDU_menu() {
     prtln("Will Load SD-Updater menu.bin", D1_SERI);
-    M5.Display.drawString("Menu.bin", 220, 120);
+    M5.Display.drawString("Menu.bin   ", SX1, SY1);
     delay(3000);
     loadMenu();
     FOREVER_LOOP();
@@ -220,7 +247,7 @@ static void func02_SDU_menu() {
 
 static void func03_SDU_saveBin() {
     prtln("Will Save bin_file to SD", D1_SERI);
-    M5.Display.drawString("save bin", 220, 120);
+    M5.Display.drawString("save bin   ", SX1, SY1);
     delay(3000);
     saveBin();
     delay(500);
@@ -228,8 +255,12 @@ static void func03_SDU_saveBin() {
 
 static void func04_PowerOff() {
     prtln("PowerOff", D1_SERI);
-    M5.Display.drawString("PowerOff", 240, 120);
+    M5.Display.setTextScroll(false);
+    M5.Display.setTextDatum(0);
+    M5.Display.setCursor(SX1, SY1);
+    M5.Display.print("  Power Off    ");
     delay(3000);
+
     M5.Power.powerOff();
     FOREVER_LOOP;
 }
@@ -421,41 +452,39 @@ void exec_menu(bool holding) {
     switch (MODE_ST) {
         case MD01:
             if (menu01[cursor_index].func != nullptr) {
-                M5.Display.setClipRect(menu_x + menu_w + 5, 0,
-                                       M5.Display.width(),
-                                       M5.Display.height() - 30);
+                // M5.Display.setClipRect(menu_x + menu_w + 5, 0,M5.Display.width(),M5.Display.height() - 30);
                 menu01[cursor_index].func();
-                M5.Display.clearClipRect();
+                // M5.Display.clearClipRect();
             }
             break;
 
         case MD02:
             if (menu02[cursor_index].func != nullptr) {
-                M5.Display.setClipRect(menu_x + menu_w + 5, 0,
-                                       M5.Display.width(),
-                                       M5.Display.height() - 30);
+                // M5.Display.setClipRect(menu_x + menu_w + 5, 0,
+                //                        M5.Display.width(),
+                //                        M5.Display.height() - 30);
                 menu02[cursor_index].func();
-                M5.Display.clearClipRect();
+                // M5.Display.clearClipRect();
             }
             break;
 
         case MD03:
             if (menu03[cursor_index].func != nullptr) {
-                M5.Display.setClipRect(menu_x + menu_w + 5, 0,
-                                       M5.Display.width(),
-                                       M5.Display.height() - 30);
+                // M5.Display.setClipRect(menu_x + menu_w + 5, 0,
+                //                        M5.Display.width(),
+                //                        M5.Display.height() - 30);
                 menu03[cursor_index].func();
-                M5.Display.clearClipRect();
+                // M5.Display.clearClipRect();
             }
             break;
 
         case MD04:
             if (menu04[cursor_index].func != nullptr) {
-                M5.Display.setClipRect(menu_x + menu_w + 5, 0,
-                                       M5.Display.width(),
-                                       M5.Display.height() - 30);
+                // M5.Display.setClipRect(menu_x + menu_w + 5, 0,
+                //                        M5.Display.width(),
+                //                        M5.Display.height() - 30);
                 menu04[cursor_index].func();
-                M5.Display.clearClipRect();
+                // M5.Display.clearClipRect();
             }
             break;
     }
@@ -544,8 +573,11 @@ void setup_MDxx(int mode) {
     msg = get_MDxx_msg(mode);
     M5.Display.print(msg.c_str());
 
-    msg = "prev             exit             next";
-    M5.Display.setCursor(0, M5.Display.height() - 30);
+    // msg = "123456789012345678901234567890";
+    // M5.Display.setCursor(0, M5.Display.height() - 40);
+    // M5.Display.print(msg.c_str());
+    msg = "     prev         exit         next";
+    M5.Display.setCursor(0, M5.Display.height() - 20);
     M5.Display.print(msg.c_str());
 
     for (size_t i = 0; i < menu_count; i++) {
