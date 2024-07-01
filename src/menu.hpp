@@ -13,11 +13,6 @@
 #define MD06   6     // MD06  power off
 #define MD_END 6     // end of mode 
 
-// menu string disp area for M5Disp() -- 
-#define SX1 170    // width(320) / 2  + 10
-#define SY1  90    // height(240) / 2 - 30 
-#define SX2 170    //  = sx1 
-#define SY2 120    //  sy1 + 30
 
 extern int MODE_ST;
 extern void setup_MDxx(int mode);

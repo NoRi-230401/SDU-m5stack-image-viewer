@@ -14,6 +14,7 @@ size_t get_menu_count(int mode);
 void MD00_disp();
 void M5Disp(String msg, int32_t x, int32_t y);
 String get_MDxx_msg(int mode);
+void menuDisp(String msg, int lineNo);
 
 static void func01_AUTOMODE_OFF();
 static void func01_AUTOMODE_FORWARD();
@@ -36,6 +37,12 @@ static int menu_w = 120;
 static int menu_h = 40;
 static int menu_padding = 48;
 
+// menu string disp area for M5Disp() --
+#define SX1 165 // width(320) /  2  + 5
+// #define SY1 90  // height(240) / 2 - 30
+// #define SX2 165 //  = sx1
+// #define SY2 120 //  sy1 + 30
+
 void M5Disp(String msg, int32_t x, int32_t y)
 {
   M5.Display.setTextScroll(false);
@@ -47,13 +54,32 @@ void M5Disp(String msg, int32_t x, int32_t y)
   M5.Display.print(msg.c_str());
 }
 
+// lineNo : 0 to 6
+void menuDisp(String msg, int lineNo)
+{
+  if(lineNo<0 || lineNo>6)
+    return;
+
+  M5.Display.setTextScroll(false);
+  M5.Display.setTextDatum(0);
+
+  int32_t y = (lineNo + 2) * 25;
+  
+  // space for void 
+  M5.Display.setCursor(SX1, y);
+  M5.Display.print("                      ");  
+  
+  M5.Display.setCursor(SX1, y);
+  M5.Display.print(msg.c_str());
+}
+
 static void func01_AUTOMODE_OFF()
 {
   prtln("AutoMode set OFF", D1_SERI);
   viewer.setAutoMode(AUTOMODE_OFF);
 
-  M5Disp("AutoMode", SX1, SY1);
-  M5Disp(" -> off", SX2, SY2);
+  menuDisp("AutoMode", 2);
+  menuDisp(" -> off", 3);
 
   delay(100);
 }
@@ -63,8 +89,8 @@ static void func01_AUTOMODE_FORWARD()
   prtln("AutoMode set FORWARD", D1_SERI);
   viewer.setAutoMode(AUTOMODE_FORWARD);
 
-  M5Disp("AutoMode", SX1, SY1);
-  M5Disp(" -> forward", SX2, SY2);
+  menuDisp("AutoMode", 2);
+  menuDisp(" -> forward", 3);
   delay(100);
 }
 
@@ -73,8 +99,8 @@ static void func01_AUTOMODE_BACKWARD()
   prtln("AutoMode set BACKWARD", D1_SERI);
   viewer.setAutoMode(AUTOMODE_BACKRWARD);
 
-  M5Disp("AutoMode", SX1, SY1);
-  M5Disp(" -> backward", SX2, SY2);
+  menuDisp("AutoMode", 2);
+  menuDisp(" -> backward", 3);
   delay(100);
 }
 
@@ -83,16 +109,16 @@ static void func01_AUTOMODE_RND()
   prtln("AutoMode set RND", D1_SERI);
   viewer.setAutoMode(AUTOMODE_RND);
 
-  M5Disp("AutoMode", SX1, SY1);
-  M5Disp("-> random", SX2, SY2);
+  menuDisp("AutoMode", 2);
+  menuDisp("-> random", 3);
   delay(100);
 }
 
 static void func02_intval_01()
 {
   prtln("Interval 3sec", D1_SERI);
-  M5Disp("Interval", SX1, SY1);
-  M5Disp("  -> 3sec", SX2, SY2);
+  menuDisp("Interval", 2);
+  menuDisp("  -> 3sec", 3);
   viewer.setIntval(3000);
   delay(100);
 }
@@ -100,8 +126,8 @@ static void func02_intval_01()
 static void func02_intval_02()
 {
   prtln("Interval 5sec", D1_SERI);
-  M5Disp("Interval", SX1, SY1);
-  M5Disp("  -> 5sec", SX2, SY2);
+  menuDisp("Interval", 2);
+  menuDisp("  -> 5sec", 3);
   viewer.setIntval(5000);
   delay(100);
 }
@@ -109,8 +135,8 @@ static void func02_intval_02()
 static void func02_intval_03()
 {
   prtln("Interval 10sec", D1_SERI);
-  M5Disp("Interval", SX1, SY1);
-  M5Disp("  -> 10sec", SX2, SY2);
+  menuDisp("Interval", 2);
+  menuDisp("  -> 10sec", 3);
   viewer.setIntval(10000);
   delay(100);
 }
@@ -118,8 +144,8 @@ static void func02_intval_03()
 static void func03_intvalRnd_01()
 {
   prtln("Interval Rnd Off", D1_SERI);
-  M5Disp("Interval Rnd", SX1, SY1);
-  M5Disp("  -> off", SX2, SY2);
+  menuDisp("Interval Rnd", 2);
+  menuDisp("  -> off", 3);
   viewer.setIntvalRnd(false);
   delay(100);
 }
@@ -127,8 +153,8 @@ static void func03_intvalRnd_01()
 static void func03_intvalRnd_02()
 {
   prtln("Interval Rnd On", D1_SERI);
-  M5Disp("Interval Rnd", SX1, SY1);
-  M5Disp("  -> on", SX2, SY2);
+  menuDisp("Interval Rnd", 2);
+  menuDisp("  -> on", 3);
   viewer.setIntvalRnd(true);
   delay(100);
 }
@@ -136,7 +162,7 @@ static void func03_intvalRnd_02()
 static void func04_SDU_menu()
 {
   prtln("Will Load SD-Updater menu.bin", D1_SERI);
-  M5Disp(" Load menu.bin", SX1, SY1);
+  menuDisp(" Load menu.bin", 2);
   delay(3000);
   disp_init();
   delay(100);
@@ -147,7 +173,7 @@ static void func04_SDU_menu()
 static void func05_SDU_saveBin()
 {
   prtln("Will Save bin_file to SD", D1_SERI);
-  M5Disp(" Save bin to SD", SX1, SY1);
+  menuDisp(" Save bin to SD", 2);
   delay(3000);
   disp_init();
   delay(100);
@@ -162,7 +188,7 @@ static void func05_SDU_saveBin()
 static void func06_PowerOff()
 {
   prtln("PowerOff", D1_SERI);
-  M5Disp(" Power Off", SX1, SY1);
+  menuDisp(" Power Off", 2);
   delay(3000);
   M5.Power.powerOff();
   FOREVER_LOOP;
@@ -370,7 +396,6 @@ size_t get_menu_count(int mode)
 void disp_init()
 {
   M5.Display.endWrite();
-
   M5.Display.fillScreen(TFT_BLACK); // 画面クリア
   M5.Display.setRotation(1);
   M5.Display.setTextSize(1.0);
@@ -380,8 +405,6 @@ void disp_init()
   M5.Display.setCursor(0, 0); // カーソルセット
   M5.Display.setTextScroll(false);
   M5.Display.setTextWrap(false); // テキスト自動折返し
-  // M5.Display.fillScreen(TFT_BLACK); // 画面クリア
-  // delay(20);
 }
 
 void setup_MDxx(int mode)
@@ -391,7 +414,6 @@ void setup_MDxx(int mode)
   const int M_Y[4] = {70, 60, 50, 25};
   String msg = "";
   M5.Display.fillScreen(TFT_BLACK);
-  // delay(20);
 
   cursor_index = 0;
   menu_count = get_menu_count(mode);
