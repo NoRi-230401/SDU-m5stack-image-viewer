@@ -2,115 +2,6 @@
 #include "menu.hpp"
 #include "sdu.hpp"
 
-#if defined(ARDUINO_M5STACK_DIAL) || defined(ARDUINO_M5STACK_DIN_METER)
-#include "M5Encoder.hpp"
-
-#if defined(ARDUINO_M5STACK_DIAL)
-inline int16_t getEncoderOffset(void)
-{
-    return 4;
-}
-
-inline int32_t getTextAreaX(void)
-{
-    return 35;
-}
-
-inline int32_t getTextAreaY(void)
-{
-    return 35;
-}
-
-inline int32_t getTextAreaWidth(void)
-{
-    return 170;
-}
-
-inline int32_t getTextAreaHeight(void)
-{
-    return 170;
-}
-#else
-inline int16_t getEncoderOffset(void)
-{
-    return 2;
-}
-
-inline int32_t getTextAreaX(void)
-{
-    return 0;
-}
-
-inline int32_t getTextAreaY(void)
-{
-    return 0;
-}
-
-inline int32_t getTextAreaWidth(void)
-{
-    return M5.Lcd.width();
-}
-
-inline int32_t getTextAreaHeight(void)
-{
-    return M5.Lcd.height();
-}
-#endif
-
-static M5Encoder encoder;
-static int16_t prev_dial_pos = 0;
-
-inline void M5_BEGIN(m5::M5Unified::config_t cfg)
-{
-    M5.begin(cfg);
-    encoder.begin();
-}
-
-inline void M5_BEGIN(void)
-{
-    auto cfg = M5.config();
-    M5_BEGIN(cfg);
-}
-
-inline void M5_UPDATE(void)
-{
-    M5.update();
-}
-
-inline int16_t getDirection(void)
-{
-    // const long pos = M5Dial.Encoder.read();
-    const int16_t pos = encoder.read();
-    M5_LOGV("Dial: %d -> %d", prev_dial_pos, pos);
-    if (abs(prev_dial_pos - pos) >= getEncoderOffset())
-    {
-        const int16_t direction = pos - prev_dial_pos > 0 ? 1 : -1;
-        prev_dial_pos = pos;
-        return direction;
-    }
-    else
-    {
-        return 0;
-    }
-}
-#else
-
-inline void M5_BEGIN(m5::M5Unified::config_t cfg)
-{
-    M5.begin(cfg);
-}
-
-inline void M5_BEGIN(void)
-{
-    auto cfg = M5.config();
-    M5.begin(cfg);
-}
-
-inline void M5_UPDATE(void)
-{
-    M5.update();
-}
-
 inline int32_t getDirection(void)
 {
     if (M5.BtnA.wasClicked())
@@ -148,14 +39,14 @@ inline int32_t getTextAreaHeight(void)
 {
     return M5.Lcd.height();
 }
-#endif
 
 #include <Arduino_JSON.h>
 #include <string.h>
 
 // -----mode by NoRi 2024-06-24 -----------------------------------------------
 const char *ImageViewer::VERSION = "v105-mod-V202";
-const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
+// const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
+const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView.json";
 String ImageViewer::DATA_DIR("/Pictures");
 const char *ImageViewer::KEY_DATA_DIR = "DataDir";
 // ----------------------------------------------------------------------------
@@ -174,7 +65,7 @@ static const char *EXT_JPEG = ".jpeg";
 static const char *EXT_BMP = ".bmp";
 static const char *EXT_PNG = ".png";
 
-ImageViewer::ImageViewer(bool isAutoMode, uint32_t autoModeInterval,
+ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval,
                          bool isAutoModeRandomized, bool isAutoRotation)
     : _orientation(0),
       _isAutoMode(isAutoMode),
@@ -198,22 +89,7 @@ bool ImageViewer::begin(int bgColor)
 {
 
     this->_orientation = M5.Lcd.getRotation();
-#if defined(ARDUINO_M5STACK_CARDPUTER) // TODO: removed when M5GFX v0.1.16 is
-                                       // released
-    this->_orientation = 1;
-#endif
     M5.Lcd.setRotation(this->_orientation);
-
-#if defined(ARDUINO_M5STACK_COREINK) || defined(ARDUINO_M5STACK_PAPER)
-    M5.Lcd.invertDisplay(false);
-    M5.Lcd.setEpdMode(epd_mode_t::epd_quality);
-#endif
-
-    // ------------ NoRi ----------------------------------
-    // if (!IV_FS.begin(FORMAT_FS_IF_FAILED)) {
-    //     M5.Lcd.println("Failed to mount File System");
-    //     return false;
-    // }
 
     if (!SdBegin())
     {
@@ -232,46 +108,6 @@ bool ImageViewer::begin(int bgColor)
         return false;
     }
 
-    // M5_UPDATE();
-
-    // prtln("Mode:");
-    // if (M5.BtnA.isPressed())
-    // {
-    //     this->_isAutoMode = true; // overriding the setting
-    //     prtln(" Auto(Forced)");
-    // }
-    // else
-    // {
-    //     String msg = String(this->_isAutoMode ? " Auto" : " Manual");
-    //     prtln(msg);
-    // }
-
-    prtln("Rotation:");
-    if (this->_isAutoRotation)
-    {
-        if (M5.Imu.isEnabled())
-        {
-            prtln(" Auto");
-            if (M5.getBoard() == m5::board_t::board_M5Stack ||
-                M5.getBoard() == m5::board_t::board_M5StackCoreS3 ||
-                M5.getBoard() == m5::board_t::board_M5StackCore2)
-            {
-                M5.Imu.setAxisOrder(m5::IMU_Class::axis_y_pos,
-                                    m5::IMU_Class::axis_x_neg,
-                                    m5::IMU_Class::axis_z_pos);
-            }
-        }
-        else
-        {
-            this->_isAutoRotation = false;
-            prtln(" No(IMU disabled)");
-        }
-    }
-    else
-    {
-        prtln(" No");
-    }
-
     delay(DEFAULT_START_INTERVAL_MS);
     if (!setImageFileList())
     {
@@ -284,16 +120,17 @@ bool ImageViewer::begin(int bgColor)
     delay(DEFAULT_START_INTERVAL_MS);
     M5.Lcd.clear();
     M5.Lcd.fillScreen(bgColor);
-    if (this->_isAutoRotation)
-    {
-        updateOrientation();
-    }
-    else
-    {
-        M5.Lcd.setRotation(this->_orientation);
-    }
 
-    if (!this->_isAutoMode)
+    // if (this->_isAutoRotation)
+    // {
+    //     updateOrientation();
+    // }
+    // else
+    // {
+    //     M5.Lcd.setRotation(this->_orientation);
+    // }
+
+    if (this->_isAutoMode == AUTOMODE_OFF)
     {
         showImage(this->_imageFiles, this->_pos);
     }
@@ -303,43 +140,88 @@ bool ImageViewer::begin(int bgColor)
 
 bool ImageViewer::update(void)
 {
-    // M5_UPDATE();
-
-    // if (this->_isAutoRotation && updateOrientation(GRAVITY_THRESHOLD))
-    // {
-    //     showImage(this->_imageFiles, this->_pos);
-    // }
-
     const uint32_t t = millis();
     int32_t direction = getDirection();
-    if (direction == 0 && this->_isAutoMode && (t - this->_prevUpdate >= this->_interval))
-    {
-        direction = 1;
-    }
+    size_t imgPos = this->_pos;
+    size_t imgLen = this->_nImageFiles;
+    uint8_t AUTO_MODE = this->_isAutoMode;
 
-    if (direction != 0)
+    if (AUTO_MODE == AUTOMODE_OFF)
     {
-        this->_prevUpdate = t;
-        if (direction < 0 && this->_pos == 0)
+        switch (direction)
         {
-            this->_pos = this->_nImageFiles - 1;
+        case 1:
+            if (imgPos >= imgLen - 1)
+                imgPos = 0;
+            else
+                imgPos++;
+            break;
+
+        case -1:
+            if (imgPos <= 0)
+                imgPos = imgLen - 1;
+            else
+                imgPos--;
+            break;
+
+        default:
+            return false;
         }
-        else if (direction > 0 && this->_pos == this->_nImageFiles - 1)
-        {
-            this->_pos = 0;
-        }
-        else
-        {
-            this->_pos += direction;
-        }
-        
+        this->_pos = imgPos;
+        // this->_prevUpdate = t;
         showImage(this->_imageFiles, this->_pos);
-        if (this->_isAutoMode && this->_isAutoModeRandomized)
-        {
-            this->_interval = random(this->_autoModeInterval);
-        }
+
+        prtln("t = " + String(t, 10), D1_SERI);
+        prtln("direction = " + String(direction, 10), D1_SERI);
+        prtln("imgPos = " + String(imgPos, 10), D1_SERI);
+        prtln("imgLen = " + String(imgLen, 10), D1_SERI);
+        prtln("AUTO_MODE = " + String(AUTO_MODE, 10), D1_SERI);
+        prtln("prvUpdate = " + String(this->_prevUpdate, 10), D1_SERI);
+        prtln("interval  = " + String(this->_interval, 10), D1_SERI);
+        // delay(1000);
+        return true;
     }
-    return direction != 0;
+    else if (t - this->_prevUpdate >= this->_interval)
+    {
+        switch (AUTO_MODE)
+        {
+        case AUTOMODE_FORWARD:
+            if (imgPos >= imgLen - 1)
+                imgPos = 0;
+            else
+                imgPos++;
+            break;
+
+        case AUTOMODE_BACKRWARD:
+            if (imgPos <= 0)
+                imgPos = imgLen - 1;
+            else
+                imgPos--;
+            break;
+
+        case AUTOMODE_RND:
+            imgPos = random(imgLen);
+            break;
+
+        default:
+            return false;
+        }
+        this->_pos = imgPos;
+        showImage(this->_imageFiles, this->_pos);
+
+        prtln("t = " + String(t, 10), D1_SERI);
+        prtln("direction = " + String(direction, 10), D1_SERI);
+        prtln("imgPos = " + String(imgPos, 10), D1_SERI);
+        prtln("imgLen = " + String(imgLen, 10), D1_SERI);
+        prtln("AUTO_MODE = " + String(AUTO_MODE, 10), D1_SERI);
+        prtln("prvUpdate = " + String(this->_prevUpdate, 10), D1_SERI);
+        prtln("interval  = " + String(this->_interval, 10), D1_SERI);
+
+        this->_prevUpdate = t;
+        // delay(1000);
+        return true;
+    }
+    return false;
 }
 
 bool ImageViewer::setImageFileList(const String &path)
@@ -419,12 +301,12 @@ bool ImageViewer::updateOrientation(float threshold)
     return false;
 }
 
-bool ImageViewer::isAutoMode()
+uint8_t ImageViewer::getAutoMode()
 {
     return _isAutoMode;
 }
 
-void ImageViewer::setAutoMode(bool mode)
+void ImageViewer::setAutoMode(uint8_t mode)
 {
     _isAutoMode = mode;
 }
@@ -456,10 +338,8 @@ void ImageViewer::showImage(const String images[], size_t p)
     }
     else
     {
-        // M5.Lcd.printf("ignore: %s", filename);
-        // M5.Lcd.println();
         String msg2 = "ignore: " + String(filename);
-        prtln(msg2);
+        prtln(msg2, D1_SERI);
     }
     M5.Lcd.endWrite();
 }
@@ -575,9 +455,9 @@ bool ImageViewer::parse(const char *config)
     }
     if (o.hasOwnProperty(KEY_AUTO_MODE))
     {
-        this->_isAutoMode = (bool)o[KEY_AUTO_MODE];
+        this->_isAutoMode = (uint8_t)o[KEY_AUTO_MODE];
     }
-    msg = " AutoMode: " + String(this->_isAutoMode ? "true" : "false");
+    msg = " AutoMode: " + String(this->_isAutoMode, 10);
     prtln(msg);
 
     if (o.hasOwnProperty(KEY_AUTO_MODE_INTERVAL))

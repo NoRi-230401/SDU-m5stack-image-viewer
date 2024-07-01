@@ -3,20 +3,26 @@
 #include "sdu.hpp"
 #include "ImageViewer.hpp"
 
-void setup_MDxx(int mode);
-void loop_MDxx();
-void disp_init();
-void forever(void);
+// void forever(void);
+void M5Disp(String msg, int32_t x, int32_t y);
 void MD00_disp();
-static void func01_on();
-static void func01_off();
+static void func01_AUTOMODE_OFF();
+static void func01_AUTOMODE_FORWARD();
+static void func01_AUTOMODE_BACKWARD();
+static void func01_AUTOMODE_RND();
 static void func02_SDU_menu();
 static void func03_SDU_saveBin();
 static void func04_PowerOff();
+void draw_menu(size_t index, bool focus);
+void select_menu(size_t index);
+// void move_menu(bool back = false);
+void exec_menu(bool holding);
 size_t get_menu_count(int mode);
-void M5Disp(String msg, int32_t x, int32_t y);
-String get_MDxx_msg(int mode);
+void disp_init();
+void setup_MDxx(int mode);
+void loop_MDxx();
 void MD00_disp();
+String get_MDxx_msg(int mode);
 void prt(String sData, int direction);
 void prtln(String sData, int direction);
 void FOREVER_LOOP();
@@ -24,6 +30,7 @@ void POWER_OFF();
 void REBOOT();
 
 extern ImageViewer viewer;
+
 int MODE_ST = MDM2; // mode status = init
 static int menu_x = 2;
 static int menu_y = 20;
@@ -31,13 +38,13 @@ static int menu_w = 120;
 static int menu_h = 30;
 static int menu_padding = 36;
 
-void forever(void)
-{
-  while (true)
-  {
-    delay(1);
-  }
-}
+// void forever(void)
+// {
+//   while (true)
+//   {
+//     delay(1);
+//   }
+// }
 
 void M5Disp(String msg, int32_t x, int32_t y)
 {
@@ -50,25 +57,44 @@ void M5Disp(String msg, int32_t x, int32_t y)
   M5.Display.print(msg.c_str());
 }
 
-static void func01_on()
+static void func01_AUTOMODE_OFF()
 {
-  prtln("AutoMode set on", D1_SERI);
-  viewer.setAutoMode(true);
+  prtln("AutoMode set OFF", D1_SERI);
+  viewer.setAutoMode(AUTOMODE_OFF);
 
-  M5Disp("  AutoMode", SX1, SY1);
-  M5Disp("        --> ON", SX2, SY2);
+  M5Disp("AutoMode", SX1, SY1);
+  M5Disp("-> off:0", SX2, SY2);
 
   delay(100);
 }
 
-static void func01_off()
+static void func01_AUTOMODE_FORWARD()
 {
-  prtln("AutoMode set off", D1_SERI);
-  viewer.setAutoMode(false);
+  prtln("AutoMode set FORWARD", D1_SERI);
+  viewer.setAutoMode(AUTOMODE_FORWARD);
 
-  M5Disp("  AutoMode", SX1, SY1);
-  M5Disp("        --> OFF", SX2, SY2);
+  M5Disp("AutoMode", SX1, SY1);
+  M5Disp("-> forward:1", SX2, SY2);
+  delay(100);
+}
 
+static void func01_AUTOMODE_BACKWARD()
+{
+  prtln("AutoMode set BACKWARD", D1_SERI);
+  viewer.setAutoMode(AUTOMODE_BACKRWARD);
+
+  M5Disp("AutoMode", SX1, SY1);
+  M5Disp("-> backward:2", SX2, SY2);
+  delay(100);
+}
+
+static void func01_AUTOMODE_RND()
+{
+  prtln("AutoMode set RND", D1_SERI);
+  viewer.setAutoMode(AUTOMODE_RND);
+
+  M5Disp("AutoMode", SX1, SY1);
+  M5Disp("-> random:3", SX2, SY2);
   delay(100);
 }
 
@@ -116,9 +142,12 @@ struct menu_item_t
 
 /// メニュー01の定義
 static const menu_item_t menu01[] = {
-    {"on", func01_on},
-    {"off", func01_off},
+    {"off", func01_AUTOMODE_OFF},
+    {"forward", func01_AUTOMODE_FORWARD},
+    {"backward", func01_AUTOMODE_BACKWARD},
+    {"random", func01_AUTOMODE_RND},
 };
+
 /// メニュー02の定義
 static const menu_item_t menu02[] = {
     {"SDU-menu", func02_SDU_menu},
@@ -199,55 +228,55 @@ void select_menu(size_t index)
   cursor_index = index;
 }
 
-void move_menu(bool back = false)
-{
-  switch (MODE_ST)
-  {
-  case MD01:
-    if (back)
-    {
-      select_menu((cursor_index ? cursor_index : menu01_count) - 1);
-    }
-    else
-    {
-      select_menu((cursor_index + 1) % menu01_count);
-    }
-    break;
+// void move_menu(bool back = false)
+// {
+//   switch (MODE_ST)
+//   {
+//   case MD01:
+//     if (back)
+//     {
+//       select_menu((cursor_index ? cursor_index : menu01_count) - 1);
+//     }
+//     else
+//     {
+//       select_menu((cursor_index + 1) % menu01_count);
+//     }
+//     break;
 
-  case MD02:
-    if (back)
-    {
-      select_menu((cursor_index ? cursor_index : menu02_count) - 1);
-    }
-    else
-    {
-      select_menu((cursor_index + 1) % menu02_count);
-    }
-    break;
+//   case MD02:
+//     if (back)
+//     {
+//       select_menu((cursor_index ? cursor_index : menu02_count) - 1);
+//     }
+//     else
+//     {
+//       select_menu((cursor_index + 1) % menu02_count);
+//     }
+//     break;
 
-  case MD03:
-    if (back)
-    {
-      select_menu((cursor_index ? cursor_index : menu03_count) - 1);
-    }
-    else
-    {
-      select_menu((cursor_index + 1) % menu03_count);
-    }
-    break;
+//   case MD03:
+//     if (back)
+//     {
+//       select_menu((cursor_index ? cursor_index : menu03_count) - 1);
+//     }
+//     else
+//     {
+//       select_menu((cursor_index + 1) % menu03_count);
+//     }
+//     break;
 
-  case MD04:
-    if (back)
-    {
-      select_menu((cursor_index ? cursor_index : menu04_count) - 1);
-    }
-    else
-    {
-      select_menu((cursor_index + 1) % menu04_count);
-    }
-    break;
-  }
-}
+//   case MD04:
+//     if (back)
+//     {
+//       select_menu((cursor_index ? cursor_index : menu04_count) - 1);
+//     }
+//     else
+//     {
+//       select_menu((cursor_index + 1) % menu04_count);
+//     }
+//     break;
+//   }
+// }
 
 void exec_menu(bool holding)
 {
@@ -324,17 +353,16 @@ void disp_init()
   M5.Display.setTextDatum(0);
   M5.Display.setCursor(0, 0); // カーソルセット
   M5.Display.setTextScroll(false);
-  M5.Display.setTextWrap(false);    // テキスト自動折返し
+  M5.Display.setTextWrap(false); // テキスト自動折返し
   // M5.Display.fillScreen(TFT_BLACK); // 画面クリア
   // delay(20);
 }
 
-const int M_PADDING[4] = {70, 60, 50, 40};
-const int M_H[4] = {60, 50, 40, 35};
-const int M_Y[4] = {70, 60, 50, 50};
-
 void setup_MDxx(int mode)
 {
+  const int M_PADDING[4] = {70, 60, 50, 48};
+  const int M_H[4] = {60, 50, 40, 40};
+  const int M_Y[4] = {70, 60, 50, 25};
   String msg = "";
   M5.Display.fillScreen(TFT_BLACK);
   // delay(20);
@@ -453,20 +481,17 @@ void MD00_disp()
   M5.Display.printf("(BtnA)click: prev image\n\n");
   M5.Display.printf("(BtnB)hold : setting menu\n\n");
   M5.Display.printf("(BtnC)click: next image\n");
-  // delay(1000);
 }
 
 String get_MDxx_msg(int mode)
 {
+  const String AUTOMODE[4] = {"off", "forward", "backward", "random"};
   String msg = "";
 
   switch (mode)
   {
   case MD01:
-    if (viewer.isAutoMode())
-      msg = "AutoMode : ON";
-    else
-      msg = "AutoMode : OFF";
+    msg = "AutoMode : " + AUTOMODE[viewer.getAutoMode()];
     break;
 
   case MD02:
@@ -515,7 +540,6 @@ void prtln(String sData, int direction)
   String strData = sData + "\n";
   prt(strData, direction);
 }
-
 
 void FOREVER_LOOP()
 {
