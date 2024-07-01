@@ -2,7 +2,7 @@
 #include <M5Unified.h>
 #include <ESP32-targz.h>
 #include <M5StackUpdater.h>
-#include "sdu.hpp"
+#include "util.hpp"
 #include "menu.hpp"
 
 #define APP_VER "SDU-imageViewer-v201-230624"
@@ -15,6 +15,11 @@ void setupSDUpdater(const char *appName);
 void sdu_lobby();
 void loadMenu(void);
 void saveBin(void);
+void prt(String sData, int direction);
+void prtln(String sData, int direction);
+void FOREVER_LOOP();
+void POWER_OFF();
+void REBOOT();
 
 void loadMenu(void)
 {
@@ -70,4 +75,63 @@ void setupSDUpdater(const char *appName)
 void sdu_lobby()
 {
   setupSDUpdater(APP_NAME);
+}
+
+
+void prt(String sData, int direction)
+{
+  switch (direction)
+  {
+  case D3_BOTH:
+    M5.Log.print(sData.c_str());
+    M5.Display.print(sData.c_str());
+    break;
+
+  case D2_DISP:
+    M5.Display.print(sData.c_str());
+    break;
+
+  case D1_SERI:
+    M5.Log.print(sData.c_str());
+    break;
+
+  default:
+    break;
+  }
+}
+
+void prtln(String sData, int direction)
+{
+  String strData = sData + "\n";
+  prt(strData, direction);
+}
+
+void FOREVER_LOOP()
+{
+  while (true)
+  {
+    delay(10);
+  }
+}
+
+void POWER_OFF()
+{
+  prtln("\n\n*** POWER_OFF ***", D1_SERI);
+  //   SPIFFS.end();
+  SD.end();
+
+  delay(3000);
+  M5.Power.powerOff();
+  FOREVER_LOOP();
+}
+
+void REBOOT()
+{
+  prtln("\n\n*** REBOOT ***", D3_BOTH);
+  //   SPIFFS.end();
+  SD.end();
+
+  delay(3000);
+  ESP.restart();
+  FOREVER_LOOP();
 }

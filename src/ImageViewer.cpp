@@ -1,6 +1,6 @@
 #include "ImageViewer.hpp"
 #include "menu.hpp"
-#include "sdu.hpp"
+#include "util.hpp"
 
 inline int32_t getDirection(void)
 {
@@ -42,24 +42,16 @@ inline int32_t getTextAreaHeight(void)
 
 #include <Arduino_JSON.h>
 #include <string.h>
-
-// -----mode by NoRi 2024-06-24 -----------------------------------------------
 const char *ImageViewer::VERSION = "v105-mod-V202";
-// const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
 const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView.json";
 String ImageViewer::DATA_DIR("/Pictures");
 const char *ImageViewer::KEY_DATA_DIR = "DataDir";
-// ----------------------------------------------------------------------------
-// const char* ImageViewer::VERSION = "v1.0.5";
-// const char* ImageViewer::DEFAULT_CONFIG_NAME = "image-viewer.json";
 const char *ImageViewer::KEY_AUTO_MODE = "AutoMode";
 const char *ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
 const char *ImageViewer::KEY_AUTO_MODE_INTVAL_RND = "AutoModeRandomized";
 const char *ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
 const char *ImageViewer::KEY_ORIENTATION = "Orientation";
 const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
-// const String ImageViewer::ROOT_DIR("/");
-// static const bool FORMAT_FS_IF_FAILED = true;
 static const char *EXT_JPG = ".jpg";
 static const char *EXT_JPEG = ".jpeg";
 static const char *EXT_BMP = ".bmp";
@@ -96,7 +88,6 @@ bool ImageViewer::begin(int bgColor)
         prtln("Failed to mount SD File System");
         return false;
     }
-    // ----------------------------------------------------
 
     M5.Lcd.setFileStorage(IV_FS);
 
@@ -120,15 +111,6 @@ bool ImageViewer::begin(int bgColor)
     delay(DEFAULT_START_INTERVAL_MS);
     M5.Lcd.clear();
     M5.Lcd.fillScreen(bgColor);
-
-    // if (this->_isAutoRotation)
-    // {
-    //     updateOrientation();
-    // }
-    // else
-    // {
-    //     M5.Lcd.setRotation(this->_orientation);
-    // }
 
     if (this->_isAutoMode == AUTOMODE_OFF)
     {

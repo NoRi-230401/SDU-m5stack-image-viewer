@@ -1,6 +1,6 @@
 #include <M5Unified.h>
 #include "menu.hpp"
-#include "sdu.hpp"
+#include "util.hpp"
 #include "ImageViewer.hpp"
 
 void setup_MDxx(int mode);
@@ -19,23 +19,14 @@ static void func01_AUTOMODE_OFF();
 static void func01_AUTOMODE_FORWARD();
 static void func01_AUTOMODE_BACKWARD();
 static void func01_AUTOMODE_RND();
-
 static void func02_intval_01();
 static void func02_intval_02();
 static void func02_intval_03();
-
 static void func03_intvalRnd_01();
 static void func03_intvalRnd_02();
-
 static void func04_SDU_menu();
 static void func05_SDU_saveBin();
 static void func06_PowerOff();
-
-void prt(String sData, int direction);
-void prtln(String sData, int direction);
-void FOREVER_LOOP();
-void POWER_OFF();
-void REBOOT();
 
 extern ImageViewer viewer;
 int MODE_ST = MDM2; // mode status = init
@@ -164,7 +155,7 @@ static void func05_SDU_saveBin()
   delay(100);
   disp_init();
   delay(100);
-  setup_MDxx(MD04);
+  setup_MDxx(MD05);
   delay(100);
 }
 
@@ -218,7 +209,6 @@ static const menu_item_t menu05[] = {
 static const menu_item_t menu06[] = {
     {"PowerOff", func06_PowerOff},
 };
-
 
 /// メニュー要素数
 static constexpr const size_t menu01_count = sizeof(menu01) / sizeof(menu01[0]);
@@ -531,14 +521,14 @@ String get_MDxx_msg(int mode)
     break;
 
   case MD02:
-    msg = "AutoMode Interval : " + String(viewer.getIntval()/1000,10) + "sec";
+    msg = "AutoMode Interval : " + String(viewer.getIntval() / 1000, 10) + "sec";
     break;
 
   case MD03:
-    if(viewer.getIntvalRnd() )
-      msg = "AutoMode Interval Rnd : on" ;
+    if (viewer.getIntvalRnd())
+      msg = "AutoMode Interval Rnd : on";
     else
-      msg = "AutoMode Interval Rnd : off" ;
+      msg = "AutoMode Interval Rnd : off";
     break;
 
   case MD04:
@@ -558,62 +548,4 @@ String get_MDxx_msg(int mode)
   }
 
   return msg;
-}
-
-void prt(String sData, int direction)
-{
-  switch (direction)
-  {
-  case D3_BOTH:
-    M5.Log.print(sData.c_str());
-    M5.Display.print(sData.c_str());
-    break;
-
-  case D2_DISP:
-    M5.Display.print(sData.c_str());
-    break;
-
-  case D1_SERI:
-    M5.Log.print(sData.c_str());
-    break;
-
-  default:
-    break;
-  }
-}
-
-void prtln(String sData, int direction)
-{
-  String strData = sData + "\n";
-  prt(strData, direction);
-}
-
-void FOREVER_LOOP()
-{
-  while (true)
-  {
-    delay(10);
-  }
-}
-
-void POWER_OFF()
-{
-  prtln("\n\n*** POWER_OFF ***", D1_SERI);
-  //   SPIFFS.end();
-  SD.end();
-
-  delay(3000);
-  M5.Power.powerOff();
-  FOREVER_LOOP();
-}
-
-void REBOOT()
-{
-  prtln("\n\n*** REBOOT ***", D3_BOTH);
-  //   SPIFFS.end();
-  SD.end();
-
-  delay(3000);
-  ESP.restart();
-  FOREVER_LOOP();
 }
