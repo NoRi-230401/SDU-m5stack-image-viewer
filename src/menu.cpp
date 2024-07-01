@@ -3,26 +3,29 @@
 #include "sdu.hpp"
 #include "ImageViewer.hpp"
 
-// void forever(void);
-void M5Disp(String msg, int32_t x, int32_t y);
+void setup_MDxx(int mode);
+void loop_MDxx();
+void disp_init();
+
+void draw_menu(size_t index, bool focus);
+void select_menu(size_t index);
+void exec_menu(bool holding);
+size_t get_menu_count(int mode);
 void MD00_disp();
+void M5Disp(String msg, int32_t x, int32_t y);
+String get_MDxx_msg(int mode);
+
 static void func01_AUTOMODE_OFF();
 static void func01_AUTOMODE_FORWARD();
 static void func01_AUTOMODE_BACKWARD();
 static void func01_AUTOMODE_RND();
-static void func02_SDU_menu();
-static void func03_SDU_saveBin();
-static void func04_PowerOff();
-void draw_menu(size_t index, bool focus);
-void select_menu(size_t index);
-// void move_menu(bool back = false);
-void exec_menu(bool holding);
-size_t get_menu_count(int mode);
-void disp_init();
-void setup_MDxx(int mode);
-void loop_MDxx();
-void MD00_disp();
-String get_MDxx_msg(int mode);
+static void func02_intval_01();
+static void func02_intval_02();
+static void func02_intval_03();
+static void func03_SDU_menu();
+static void func04_SDU_saveBin();
+static void func05_PowerOff();
+
 void prt(String sData, int direction);
 void prtln(String sData, int direction);
 void FOREVER_LOOP();
@@ -30,21 +33,12 @@ void POWER_OFF();
 void REBOOT();
 
 extern ImageViewer viewer;
-
 int MODE_ST = MDM2; // mode status = init
-static int menu_x = 2;
-static int menu_y = 20;
+static int menu_x = 0;
+static int menu_y = 25;
 static int menu_w = 120;
-static int menu_h = 30;
-static int menu_padding = 36;
-
-// void forever(void)
-// {
-//   while (true)
-//   {
-//     delay(1);
-//   }
-// }
+static int menu_h = 40;
+static int menu_padding = 48;
 
 void M5Disp(String msg, int32_t x, int32_t y)
 {
@@ -63,7 +57,7 @@ static void func01_AUTOMODE_OFF()
   viewer.setAutoMode(AUTOMODE_OFF);
 
   M5Disp("AutoMode", SX1, SY1);
-  M5Disp("-> off:0", SX2, SY2);
+  M5Disp(" -> off", SX2, SY2);
 
   delay(100);
 }
@@ -74,7 +68,7 @@ static void func01_AUTOMODE_FORWARD()
   viewer.setAutoMode(AUTOMODE_FORWARD);
 
   M5Disp("AutoMode", SX1, SY1);
-  M5Disp("-> forward:1", SX2, SY2);
+  M5Disp(" -> forward", SX2, SY2);
   delay(100);
 }
 
@@ -84,7 +78,7 @@ static void func01_AUTOMODE_BACKWARD()
   viewer.setAutoMode(AUTOMODE_BACKRWARD);
 
   M5Disp("AutoMode", SX1, SY1);
-  M5Disp("-> backward:2", SX2, SY2);
+  M5Disp(" -> backward", SX2, SY2);
   delay(100);
 }
 
@@ -98,33 +92,60 @@ static void func01_AUTOMODE_RND()
   delay(100);
 }
 
-static void func02_SDU_menu()
+static void func02_intval_01()
+{
+  prtln("interval 3sec", D1_SERI);
+  M5Disp("interval", SX1, SY1);
+  M5Disp("-> 3sec", SX2, SY2);
+  viewer.setIntval(3000);
+  delay(100);
+}
+
+static void func02_intval_02()
+{
+  prtln("interval 5sec", D1_SERI);
+  M5Disp("interval", SX1, SY1);
+  M5Disp("-> 5sec", SX2, SY2);
+  viewer.setIntval(5000);
+  delay(100);
+}
+
+static void func02_intval_03()
+{
+  prtln("interval 10sec", D1_SERI);
+  M5Disp("interval", SX1, SY1);
+  M5Disp("-> 10sec", SX2, SY2);
+  viewer.setIntval(10000);
+  delay(100);
+}
+
+static void func03_SDU_menu()
 {
   prtln("Will Load SD-Updater menu.bin", D1_SERI);
   M5Disp(" Load menu.bin", SX1, SY1);
   delay(3000);
   disp_init();
-  delay(1000);
+  delay(100);
   loadMenu();
   FOREVER_LOOP();
 }
 
-static void func03_SDU_saveBin()
+static void func04_SDU_saveBin()
 {
   prtln("Will Save bin_file to SD", D1_SERI);
   M5Disp(" Save bin to SD", SX1, SY1);
   delay(3000);
   disp_init();
-  delay(500);
+  delay(100);
   saveBin();
-  delay(500);
+  delay(100);
   disp_init();
-  delay(500);
-  setup_MDxx(MD03);
-  delay(500);
+  delay(100);
+  setup_MDxx(MD04);
+  delay(100);
 }
 
-static void func04_PowerOff()
+static void func05_PowerOff()
 {
   prtln("PowerOff", D1_SERI);
   M5Disp(" Power Off", SX1, SY1);
@@ -150,31 +171,33 @@ static const menu_item_t menu01[] = {
 
 /// メニュー02の定義
 static const menu_item_t menu02[] = {
-    {"SDU-menu", func02_SDU_menu},
+    {"3sec", func02_intval_01},
+    {"5sec", func02_intval_02},
+    {"10sec", func02_intval_03},
 };
+
 /// メニュー03の定義
 static const menu_item_t menu03[] = {
-    {"SaveBin", func03_SDU_saveBin},
+    {"SDU-menu", func03_SDU_menu},
 };
-
 /// メニュー04の定義
 static const menu_item_t menu04[] = {
-    {"PowerOff", func04_PowerOff},
+    {"SaveBin", func04_SDU_saveBin},
 };
 
-/// メニュー01の要素数
+/// メニュー05の定義
+static const menu_item_t menu05[] = {
+    {"PowerOff", func05_PowerOff},
+};
+
+
+/// メニュー要素数
 static constexpr const size_t menu01_count = sizeof(menu01) / sizeof(menu01[0]);
-static size_t menu_count = menu01_count;
-
-/// メニュー02の要素数
-static constexpr const size_t menu02_count = sizeof(menu02) / sizeof(menu02[0]);
-
-/// メニュー03の要素数
 static constexpr const size_t menu03_count = sizeof(menu03) / sizeof(menu03[0]);
-
-/// メニュー04の要素数
+static constexpr const size_t menu02_count = sizeof(menu02) / sizeof(menu02[0]);
 static constexpr const size_t menu04_count = sizeof(menu04) / sizeof(menu04[0]);
-
+static constexpr const size_t menu05_count = sizeof(menu05) / sizeof(menu05[0]);
+static size_t menu_count = menu01_count;
 /// 現在カーソルのある位置
 size_t cursor_index = 0;
 
@@ -217,6 +240,12 @@ void draw_menu(size_t index, bool focus)
         menu04[index].title, menu_x + (menu_w >> 1),
         menu_y + index * menu_padding + (menu_h >> 1));
     break;
+
+  case MD05:
+    M5.Display.drawString(
+        menu05[index].title, menu_x + (menu_w >> 1),
+        menu_y + index * menu_padding + (menu_h >> 1));
+    break;
   }
 }
 
@@ -228,59 +257,8 @@ void select_menu(size_t index)
   cursor_index = index;
 }
 
-// void move_menu(bool back = false)
-// {
-//   switch (MODE_ST)
-//   {
-//   case MD01:
-//     if (back)
-//     {
-//       select_menu((cursor_index ? cursor_index : menu01_count) - 1);
-//     }
-//     else
-//     {
-//       select_menu((cursor_index + 1) % menu01_count);
-//     }
-//     break;
-
-//   case MD02:
-//     if (back)
-//     {
-//       select_menu((cursor_index ? cursor_index : menu02_count) - 1);
-//     }
-//     else
-//     {
-//       select_menu((cursor_index + 1) % menu02_count);
-//     }
-//     break;
-
-//   case MD03:
-//     if (back)
-//     {
-//       select_menu((cursor_index ? cursor_index : menu03_count) - 1);
-//     }
-//     else
-//     {
-//       select_menu((cursor_index + 1) % menu03_count);
-//     }
-//     break;
-
-//   case MD04:
-//     if (back)
-//     {
-//       select_menu((cursor_index ? cursor_index : menu04_count) - 1);
-//     }
-//     else
-//     {
-//       select_menu((cursor_index + 1) % menu04_count);
-//     }
-//     break;
-//   }
-// }
-
 void exec_menu(bool holding)
 {
-
   switch (MODE_ST)
   {
   case MD01:
@@ -310,6 +288,13 @@ void exec_menu(bool holding)
       menu04[cursor_index].func();
     }
     break;
+
+  case MD05:
+    if (menu05[cursor_index].func != nullptr)
+    {
+      menu05[cursor_index].func();
+    }
+    break;
   }
 }
 
@@ -332,6 +317,10 @@ size_t get_menu_count(int mode)
 
   case MD04:
     tmp = menu04_count;
+    break;
+
+  case MD05:
+    tmp = menu05_count;
     break;
 
   default:
@@ -478,9 +467,9 @@ void MD00_disp()
 {
   M5.Display.setTextScroll(true);
   M5.Display.printf("****   SDU-imageViewer   ****\n\n\n");
-  M5.Display.printf("(BtnA)click: prev image\n\n");
-  M5.Display.printf("(BtnB)hold : setting menu\n\n");
-  M5.Display.printf("(BtnC)click: next image\n");
+  M5.Display.printf("(BtnA)click: backward image\n\n");
+  M5.Display.printf("(BtnB) hold: setting menu\n\n");
+  M5.Display.printf("(BtnC)click: forward image\n");
 }
 
 String get_MDxx_msg(int mode)
@@ -495,14 +484,18 @@ String get_MDxx_msg(int mode)
     break;
 
   case MD02:
-    msg = "Load SD-Updater menu.bin";
+    msg = "AutoMode interval : " + String(viewer.getIntval()/1000,10) + "sec";
     break;
 
   case MD03:
-    msg = "Save bin-file to SD";
+    msg = "Load SD-Updater menu.bin";
     break;
 
   case MD04:
+    msg = "Save bin-file to SD";
+    break;
+
+  case MD05:
     msg = "Power Off";
     break;
 

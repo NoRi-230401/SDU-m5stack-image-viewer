@@ -11,12 +11,13 @@
 #define MDM1   -1    // setup start
 #define MD00   0     // setup done (Normal mode)
 #define MD01   1     // MD01  AutoMode
-#define MD02   2     // MD02  load menu.bin
-#define MD03   3     // MD03  save bin to SD
-#define MD04   4     // MD04  power off
-#define MD_END 4     // end of mode 
+#define MD02   2     // MD02  automode interval
+#define MD03   3     // MD03  load menu.bin
+#define MD04   4     // MD04  save bin to SD
+#define MD05   5     // MD05  power off
+#define MD_END 5     // end of mode 
 
-// menu disp for function  
+// menu string disp area for M5Disp() -- 
 #define SX1 170    // width(320) / 2  + 10
 #define SY1  90    // height(240) / 2 - 30 
 #define SX2 170    //  = sx1 
@@ -26,6 +27,7 @@ extern int MODE_ST;
 extern void setup_MDxx(int mode);
 extern void loop_MDxx();
 extern void disp_init();
+
 extern void prt(String sData, int direction = D3_BOTH);
 extern void prtln(String sData, int direction = D3_BOTH);
 extern void POWER_OFF();

@@ -74,6 +74,8 @@ public:
     // virtual void setAutoMode(bool mode);
     virtual uint8_t getAutoMode();
     virtual void setAutoMode(uint8_t mode);
+    virtual uint32_t getIntval();
+    virtual void setIntval(uint32_t intval);
 
 protected:
     virtual bool setImageFileList(const String &path = DATA_DIR);

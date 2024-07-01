@@ -311,6 +311,16 @@ void ImageViewer::setAutoMode(uint8_t mode)
     _isAutoMode = mode;
 }
 
+uint32_t ImageViewer::getIntval()
+{
+    return _interval;
+}
+
+void ImageViewer::setIntval(uint32_t intval)
+{
+    _interval = intval;
+}
+
 void ImageViewer::showImage(const String images[], size_t p)
 {
     const char *filename = images[p].c_str();
