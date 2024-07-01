@@ -12,10 +12,11 @@
 #define MD00   0     // setup done (Normal mode)
 #define MD01   1     // MD01  AutoMode
 #define MD02   2     // MD02  automode interval
-#define MD03   3     // MD03  load menu.bin
-#define MD04   4     // MD04  save bin to SD
-#define MD05   5     // MD05  power off
-#define MD_END 5     // end of mode 
+#define MD03   3     // MD03  automode intval Rnd
+#define MD04   4     // MD04  load menu.bin
+#define MD05   5     // MD06  save bin to SD
+#define MD06   6     // MD06  power off
+#define MD_END 6     // end of mode 
 
 // menu string disp area for M5Disp() -- 
 #define SX1 170    // width(320) / 2  + 10

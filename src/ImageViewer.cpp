@@ -54,7 +54,7 @@ const char *ImageViewer::KEY_DATA_DIR = "DataDir";
 // const char* ImageViewer::DEFAULT_CONFIG_NAME = "image-viewer.json";
 const char *ImageViewer::KEY_AUTO_MODE = "AutoMode";
 const char *ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
-const char *ImageViewer::KEY_AUTO_MODE_RANDOMIZED = "AutoModeRandomized";
+const char *ImageViewer::KEY_AUTO_MODE_INTVAL_RND = "AutoModeRandomized";
 const char *ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
 const char *ImageViewer::KEY_ORIENTATION = "Orientation";
 const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
@@ -66,11 +66,11 @@ static const char *EXT_BMP = ".bmp";
 static const char *EXT_PNG = ".png";
 
 ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval,
-                         bool isAutoModeRandomized, bool isAutoRotation)
+                         bool isAutoModeIntvalRnd, bool isAutoRotation)
     : _orientation(0),
       _isAutoMode(isAutoMode),
       _autoModeInterval(autoModeInterval),
-      _isAutoModeRandomized(isAutoModeRandomized),
+      _isAutoModeIntvalRnd(isAutoModeIntvalRnd),
       _isAutoRotation(isAutoRotation),
       _imageFiles{""},
       _nImageFiles(0),
@@ -145,6 +145,7 @@ bool ImageViewer::update(void)
     size_t imgPos = this->_pos;
     size_t imgLen = this->_nImageFiles;
     uint8_t AUTO_MODE = this->_isAutoMode;
+    bool INTVAL_RND = this->_isAutoModeIntvalRnd;
 
     if (AUTO_MODE == AUTOMODE_OFF)
     {
@@ -181,7 +182,7 @@ bool ImageViewer::update(void)
         // delay(1000);
         return true;
     }
-    else if (t - this->_prevUpdate >= this->_interval)
+    else if (!INTVAL_RND && (t - this->_prevUpdate >= this->_interval))
     {
         switch (AUTO_MODE)
         {
@@ -218,9 +219,53 @@ bool ImageViewer::update(void)
         prtln("interval  = " + String(this->_interval, 10), D1_SERI);
 
         this->_prevUpdate = t;
-        // delay(1000);
         return true;
     }
+
+    else if (INTVAL_RND && (t - this->_prevUpdate >= this->_interval2))
+    {
+        switch (AUTO_MODE)
+        {
+        case AUTOMODE_FORWARD:
+            if (imgPos >= imgLen - 1)
+                imgPos = 0;
+            else
+                imgPos++;
+            break;
+
+        case AUTOMODE_BACKRWARD:
+            if (imgPos <= 0)
+                imgPos = imgLen - 1;
+            else
+                imgPos--;
+            break;
+
+        case AUTOMODE_RND:
+            imgPos = random(imgLen);
+            break;
+
+        default:
+            return false;
+        }
+        this->_pos = imgPos;
+        showImage(this->_imageFiles, this->_pos);
+
+        prtln("t = " + String(t, 10), D1_SERI);
+        prtln("direction = " + String(direction, 10), D1_SERI);
+        prtln("imgPos = " + String(imgPos, 10), D1_SERI);
+        prtln("imgLen = " + String(imgLen, 10), D1_SERI);
+        prtln("AUTO_MODE = " + String(AUTO_MODE, 10), D1_SERI);
+        prtln("prvUpdate = " + String(this->_prevUpdate, 10), D1_SERI);
+        prtln("interval2 = " + String(this->_interval2, 10), D1_SERI);
+
+        this->_interval2 = random(this->_interval);
+        if (this->_interval2 <= 100)
+            this->_interval2 = 100;
+
+        this->_prevUpdate = t;
+        return true;
+    }
+
     return false;
 }
 
@@ -309,6 +354,7 @@ uint8_t ImageViewer::getAutoMode()
 void ImageViewer::setAutoMode(uint8_t mode)
 {
     _isAutoMode = mode;
+    _interval2 = 0;
 }
 
 uint32_t ImageViewer::getIntval()
@@ -319,6 +365,18 @@ uint32_t ImageViewer::getIntval()
 void ImageViewer::setIntval(uint32_t intval)
 {
     _interval = intval;
+    _interval2 = 0;
+}
+
+bool ImageViewer::getIntvalRnd()
+{
+    return _isAutoModeIntvalRnd;
+}
+
+void ImageViewer::setIntvalRnd(bool intvalRnd)
+{
+    _isAutoModeIntvalRnd = intvalRnd;
+    _interval2 = 0;
 }
 
 void ImageViewer::showImage(const String images[], size_t p)
@@ -480,12 +538,12 @@ bool ImageViewer::parse(const char *config)
     msg = "_Interval: " + String(this->_interval, 10);
     prtln(msg);
 
-    if (o.hasOwnProperty(KEY_AUTO_MODE_RANDOMIZED))
+    if (o.hasOwnProperty(KEY_AUTO_MODE_INTVAL_RND))
     {
-        this->_isAutoModeRandomized = (bool)o[KEY_AUTO_MODE_RANDOMIZED];
+        this->_isAutoModeIntvalRnd = (bool)o[KEY_AUTO_MODE_INTVAL_RND];
     }
-    msg = " Randomized: " +
-          String(this->_isAutoModeRandomized ? "true" : "false");
+    msg = " AutoMode Interval Randomized: " +
+          String(this->_isAutoModeIntvalRnd ? "true" : "false");
     prtln(msg);
 
     if (o.hasOwnProperty(KEY_AUTO_ROTATION))

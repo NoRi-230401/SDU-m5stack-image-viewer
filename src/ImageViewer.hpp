@@ -42,7 +42,8 @@ public:
     static const char *DEFAULT_CONFIG_NAME;
     static const char *KEY_AUTO_MODE;
     static const char *KEY_AUTO_MODE_INTERVAL;
-    static const char *KEY_AUTO_MODE_RANDOMIZED;
+    // static const char *KEY_AUTO_MODE_RANDOMIZED;
+    static const char *KEY_AUTO_MODE_INTVAL_RND;
     static const char *KEY_AUTO_ROTATION;
     static const char *KEY_ORIENTATION;
     static const char *KEY_DATA_DIR;
@@ -51,7 +52,8 @@ public:
     static const u_int8_t DEFAULT_AUTO_MODE = AUTOMODE_OFF;
     static const uint32_t DEFAULT_START_INTERVAL_MS = 3000;
     static const uint32_t DEFAULT_AUTO_MODE_INTERVAL_MS = 3000;
-    static const bool DEFAULT_AUTO_MODE_RANDOMIZED = false;
+    // static const bool DEFAULT_AUTO_MODE_RANDOMIZED = false;
+    static const bool DEFAULT_AUTO_MODE_INTVAL_RND = false;
     static const bool DEFAULT_AUTO_ROTATION = true;
     static const uint32_t FILE_LIST_DISPLAY_INTERVAL_MS = 100;
 
@@ -60,7 +62,8 @@ public:
 
     ImageViewer(uint8_t isAutoMode = DEFAULT_AUTO_MODE,
                 uint32_t autoModeInterval = DEFAULT_AUTO_MODE_INTERVAL_MS,
-                bool isAutoModeRandomize = DEFAULT_AUTO_MODE_RANDOMIZED,
+                // bool isAutoModeRandomize = DEFAULT_AUTO_MODE_INTVAL_RND,
+                bool isAutoModeIntvalRnd = DEFAULT_AUTO_MODE_INTVAL_RND,
                 bool isAutoRotation = DEFAULT_AUTO_ROTATION);
     virtual ~ImageViewer(void);
 
@@ -69,13 +72,12 @@ public:
 
     virtual bool updateOrientation(float threshold = GRAVITY_THRESHOLD);
 
-    // ------------ Add by NoRi ------
-    // virtual bool isAutoMode();
-    // virtual void setAutoMode(bool mode);
     virtual uint8_t getAutoMode();
     virtual void setAutoMode(uint8_t mode);
     virtual uint32_t getIntval();
     virtual void setIntval(uint32_t intval);
+    virtual bool getIntvalRnd();
+    virtual void setIntvalRnd(bool intRnd);
 
 protected:
     virtual bool setImageFileList(const String &path = DATA_DIR);
@@ -90,11 +92,10 @@ protected:
 
 private:
     uint8_t _orientation;
-    // bool _isAutoMode;
     uint8_t _isAutoMode;
 
     uint32_t _autoModeInterval;
-    bool _isAutoModeRandomized;
+    bool _isAutoModeIntvalRnd;
     bool _isAutoRotation;
 
     String _imageFiles[MAX_IMAGE_FILES];
@@ -102,6 +103,7 @@ private:
     size_t _pos;
     uint32_t _prevUpdate;
     uint32_t _interval;
+    uint32_t _interval2;
 };
 
 // ----------------------------------------------------------------------------

@@ -19,12 +19,17 @@ static void func01_AUTOMODE_OFF();
 static void func01_AUTOMODE_FORWARD();
 static void func01_AUTOMODE_BACKWARD();
 static void func01_AUTOMODE_RND();
+
 static void func02_intval_01();
 static void func02_intval_02();
 static void func02_intval_03();
-static void func03_SDU_menu();
-static void func04_SDU_saveBin();
-static void func05_PowerOff();
+
+static void func03_intvalRnd_01();
+static void func03_intvalRnd_02();
+
+static void func04_SDU_menu();
+static void func05_SDU_saveBin();
+static void func06_PowerOff();
 
 void prt(String sData, int direction);
 void prtln(String sData, int direction);
@@ -88,38 +93,56 @@ static void func01_AUTOMODE_RND()
   viewer.setAutoMode(AUTOMODE_RND);
 
   M5Disp("AutoMode", SX1, SY1);
-  M5Disp("-> random:3", SX2, SY2);
+  M5Disp("-> random", SX2, SY2);
   delay(100);
 }
 
 static void func02_intval_01()
 {
-  prtln("interval 3sec", D1_SERI);
-  M5Disp("interval", SX1, SY1);
-  M5Disp("-> 3sec", SX2, SY2);
+  prtln("Interval 3sec", D1_SERI);
+  M5Disp("Interval", SX1, SY1);
+  M5Disp("  -> 3sec", SX2, SY2);
   viewer.setIntval(3000);
   delay(100);
 }
 
 static void func02_intval_02()
 {
-  prtln("interval 5sec", D1_SERI);
-  M5Disp("interval", SX1, SY1);
-  M5Disp("-> 5sec", SX2, SY2);
+  prtln("Interval 5sec", D1_SERI);
+  M5Disp("Interval", SX1, SY1);
+  M5Disp("  -> 5sec", SX2, SY2);
   viewer.setIntval(5000);
   delay(100);
 }
 
 static void func02_intval_03()
 {
-  prtln("interval 10sec", D1_SERI);
-  M5Disp("interval", SX1, SY1);
-  M5Disp("-> 10sec", SX2, SY2);
+  prtln("Interval 10sec", D1_SERI);
+  M5Disp("Interval", SX1, SY1);
+  M5Disp("  -> 10sec", SX2, SY2);
   viewer.setIntval(10000);
   delay(100);
 }
 
-static void func03_SDU_menu()
+static void func03_intvalRnd_01()
+{
+  prtln("Interval Rnd Off", D1_SERI);
+  M5Disp("Interval Rnd", SX1, SY1);
+  M5Disp("  -> off", SX2, SY2);
+  viewer.setIntvalRnd(false);
+  delay(100);
+}
+
+static void func03_intvalRnd_02()
+{
+  prtln("Interval Rnd On", D1_SERI);
+  M5Disp("Interval Rnd", SX1, SY1);
+  M5Disp("  -> on", SX2, SY2);
+  viewer.setIntvalRnd(true);
+  delay(100);
+}
+
+static void func04_SDU_menu()
 {
   prtln("Will Load SD-Updater menu.bin", D1_SERI);
   M5Disp(" Load menu.bin", SX1, SY1);
@@ -130,7 +153,7 @@ static void func03_SDU_menu()
   FOREVER_LOOP();
 }
 
-static void func04_SDU_saveBin()
+static void func05_SDU_saveBin()
 {
   prtln("Will Save bin_file to SD", D1_SERI);
   M5Disp(" Save bin to SD", SX1, SY1);
@@ -145,7 +168,7 @@ static void func04_SDU_saveBin()
   delay(100);
 }
 
-static void func05_PowerOff()
+static void func06_PowerOff()
 {
   prtln("PowerOff", D1_SERI);
   M5Disp(" Power Off", SX1, SY1);
@@ -178,25 +201,32 @@ static const menu_item_t menu02[] = {
 
 /// メニュー03の定義
 static const menu_item_t menu03[] = {
-    {"SDU-menu", func03_SDU_menu},
-};
-/// メニュー04の定義
-static const menu_item_t menu04[] = {
-    {"SaveBin", func04_SDU_saveBin},
+    {"off", func03_intvalRnd_01},
+    {"on", func03_intvalRnd_02},
 };
 
+/// メニュー04の定義
+static const menu_item_t menu04[] = {
+    {"SDU-menu", func04_SDU_menu},
+};
 /// メニュー05の定義
 static const menu_item_t menu05[] = {
-    {"PowerOff", func05_PowerOff},
+    {"SaveBin", func05_SDU_saveBin},
+};
+
+/// メニュー06の定義
+static const menu_item_t menu06[] = {
+    {"PowerOff", func06_PowerOff},
 };
 
 
 /// メニュー要素数
 static constexpr const size_t menu01_count = sizeof(menu01) / sizeof(menu01[0]);
-static constexpr const size_t menu03_count = sizeof(menu03) / sizeof(menu03[0]);
 static constexpr const size_t menu02_count = sizeof(menu02) / sizeof(menu02[0]);
+static constexpr const size_t menu03_count = sizeof(menu03) / sizeof(menu03[0]);
 static constexpr const size_t menu04_count = sizeof(menu04) / sizeof(menu04[0]);
 static constexpr const size_t menu05_count = sizeof(menu05) / sizeof(menu05[0]);
+static constexpr const size_t menu06_count = sizeof(menu06) / sizeof(menu06[0]);
 static size_t menu_count = menu01_count;
 /// 現在カーソルのある位置
 size_t cursor_index = 0;
@@ -244,6 +274,12 @@ void draw_menu(size_t index, bool focus)
   case MD05:
     M5.Display.drawString(
         menu05[index].title, menu_x + (menu_w >> 1),
+        menu_y + index * menu_padding + (menu_h >> 1));
+    break;
+
+  case MD06:
+    M5.Display.drawString(
+        menu06[index].title, menu_x + (menu_w >> 1),
         menu_y + index * menu_padding + (menu_h >> 1));
     break;
   }
@@ -295,6 +331,13 @@ void exec_menu(bool holding)
       menu05[cursor_index].func();
     }
     break;
+
+  case MD06:
+    if (menu06[cursor_index].func != nullptr)
+    {
+      menu06[cursor_index].func();
+    }
+    break;
   }
 }
 
@@ -321,6 +364,10 @@ size_t get_menu_count(int mode)
 
   case MD05:
     tmp = menu05_count;
+    break;
+
+  case MD06:
+    tmp = menu06_count;
     break;
 
   default:
@@ -484,18 +531,25 @@ String get_MDxx_msg(int mode)
     break;
 
   case MD02:
-    msg = "AutoMode interval : " + String(viewer.getIntval()/1000,10) + "sec";
+    msg = "AutoMode Interval : " + String(viewer.getIntval()/1000,10) + "sec";
     break;
 
   case MD03:
-    msg = "Load SD-Updater menu.bin";
+    if(viewer.getIntvalRnd() )
+      msg = "AutoMode Interval Rnd : on" ;
+    else
+      msg = "AutoMode Interval Rnd : off" ;
     break;
 
   case MD04:
-    msg = "Save bin-file to SD";
+    msg = "Load SD-Updater menu.bin";
     break;
 
   case MD05:
+    msg = "Save bin-file to SD";
+    break;
+
+  case MD06:
     msg = "Power Off";
     break;
 
