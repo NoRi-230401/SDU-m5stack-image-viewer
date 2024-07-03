@@ -9,7 +9,8 @@ void disp_init();
 
 void draw_menu(size_t index, bool focus);
 void select_menu(size_t index);
-void exec_menu(bool holding);
+// void exec_menu(bool holding);
+void exec_menu(int modeNo, size_t fnIndex);
 size_t get_menu_count(int mode);
 void MD00_disp();
 void M5Disp(String msg, int32_t x, int32_t y);
@@ -29,6 +30,8 @@ static void func04_SDU_menu();
 static void func05_SDU_saveBin();
 static void func06_PowerOff();
 
+String getMenuTitle(int menuNo, int num);
+
 extern ImageViewer viewer;
 int MODE_ST = MDM2; // mode status = init
 static int menu_x = 0;
@@ -36,42 +39,6 @@ static int menu_y = 25;
 static int menu_w = 120;
 static int menu_h = 40;
 static int menu_padding = 48;
-
-// menu string disp area for M5Disp() --
-#define SX1 165 // width(320) /  2  + 5
-// #define SY1 90  // height(240) / 2 - 30
-// #define SX2 165 //  = sx1
-// #define SY2 120 //  sy1 + 30
-
-void M5Disp(String msg, int32_t x, int32_t y)
-{
-  M5.Display.setTextScroll(false);
-  M5.Display.setTextDatum(0);
-  M5.Display.setCursor(x, y);
-  M5.Display.print("                      ");
-  ;
-  M5.Display.setCursor(x, y);
-  M5.Display.print(msg.c_str());
-}
-
-// lineNo : 0 to 6
-void menuDisp(String msg, int lineNo)
-{
-  if(lineNo<0 || lineNo>6)
-    return;
-
-  M5.Display.setTextScroll(false);
-  M5.Display.setTextDatum(0);
-
-  int32_t y = (lineNo + 2) * 25;
-  
-  // space for void 
-  M5.Display.setCursor(SX1, y);
-  M5.Display.print("                      ");  
-  
-  M5.Display.setCursor(SX1, y);
-  M5.Display.print(msg.c_str());
-}
 
 static void func01_AUTOMODE_OFF()
 {
@@ -188,10 +155,33 @@ static void func05_SDU_saveBin()
 static void func06_PowerOff()
 {
   prtln("PowerOff", D1_SERI);
-  menuDisp(" Power Off", 2);
-  delay(3000);
-  M5.Power.powerOff();
-  FOREVER_LOOP;
+  // menuDisp(" Power Off", 2);
+  String msg = "";
+
+  msg = getMenuTitle(1, 0);
+  menuDisp(msg, 1);
+
+  msg = getMenuTitle(1, 1);
+  menuDisp(msg, 2);
+
+  msg = getMenuTitle(1, 2);
+  menuDisp(msg, 3);
+
+  msg = getMenuTitle(1, 3);
+  menuDisp(msg, 4);
+
+  msg = getMenuTitle(2, 0);
+  menuDisp(msg, 5);
+
+  msg = getMenuTitle(2, 1);
+  menuDisp(msg, 6);
+
+  msg = getMenuTitle(3, 0);
+  menuDisp(msg, 7);
+
+  // delay(3000);
+  // M5.Power.powerOff();
+  // FOREVER_LOOP;
 }
 
 /// メニュー用の構造体。タイトルの文字列と対応する関数のポインタを持つ
@@ -201,7 +191,7 @@ struct menu_item_t
   void (*func)(void);
 };
 
-/// メニュー01の定義
+/// メニュー定義
 static const menu_item_t menu01[] = {
     {"off", func01_AUTOMODE_OFF},
     {"forward", func01_AUTOMODE_FORWARD},
@@ -209,29 +199,25 @@ static const menu_item_t menu01[] = {
     {"random", func01_AUTOMODE_RND},
 };
 
-/// メニュー02の定義
 static const menu_item_t menu02[] = {
     {"3sec", func02_intval_01},
     {"5sec", func02_intval_02},
     {"10sec", func02_intval_03},
 };
 
-/// メニュー03の定義
 static const menu_item_t menu03[] = {
     {"off", func03_intvalRnd_01},
     {"on", func03_intvalRnd_02},
 };
 
-/// メニュー04の定義
 static const menu_item_t menu04[] = {
     {"SDU-menu", func04_SDU_menu},
 };
-/// メニュー05の定義
+
 static const menu_item_t menu05[] = {
     {"SaveBin", func05_SDU_saveBin},
 };
 
-/// メニュー06の定義
 static const menu_item_t menu06[] = {
     {"PowerOff", func06_PowerOff},
 };
@@ -243,9 +229,24 @@ static constexpr const size_t menu03_count = sizeof(menu03) / sizeof(menu03[0]);
 static constexpr const size_t menu04_count = sizeof(menu04) / sizeof(menu04[0]);
 static constexpr const size_t menu05_count = sizeof(menu05) / sizeof(menu05[0]);
 static constexpr const size_t menu06_count = sizeof(menu06) / sizeof(menu06[0]);
-static size_t menu_count = menu01_count;
+static constexpr const size_t menuCount[] = {menu01_count, menu02_count, menu03_count, menu04_count, menu05_count, menu06_count};
+static size_t menu_count = menuCount[0];
+
 /// 現在カーソルのある位置
 size_t cursor_index = 0;
+
+static const menu_item_t *menu[] = {menu01, menu02, menu03, menu04, menu05, menu06};
+
+String getMenuTitle(int modeNo, int num)
+{ // menuNo 1 to MD_END
+  if (modeNo < MD01 || modeNo > MD_END)
+    return "";
+
+  String msg = String(menu[modeNo - 1][num].title);
+  prtln(msg, D1_SERI);
+  return msg;
+}
+
 
 void draw_menu(size_t index, bool focus)
 {
@@ -261,44 +262,48 @@ void draw_menu(size_t index, bool focus)
   M5.Display.setTextColor(focus ? baseColor : ~baseColor,
                           focus ? ~baseColor : baseColor);
 
-  switch (MODE_ST)
-  {
-  case MD01:
-    M5.Display.drawString(
-        menu01[index].title, menu_x + (menu_w >> 1),
-        menu_y + index * menu_padding + (menu_h >> 1));
-    break;
+  M5.Display.drawString(
+      getMenuTitle(MODE_ST, index).c_str(), menu_x + (menu_w >> 1),
+      menu_y + index * menu_padding + (menu_h >> 1));
 
-  case MD02:
-    M5.Display.drawString(
-        menu02[index].title, menu_x + (menu_w >> 1),
-        menu_y + index * menu_padding + (menu_h >> 1));
-    break;
+  // switch (MODE_ST)
+  // {
+  // case MD01:
+  //   M5.Display.drawString(
+  //       menu01[index].title, menu_x + (menu_w >> 1),
+  //       menu_y + index * menu_padding + (menu_h >> 1));
+  //   break;
 
-  case MD03:
-    M5.Display.drawString(
-        menu03[index].title, menu_x + (menu_w >> 1),
-        menu_y + index * menu_padding + (menu_h >> 1));
-    break;
+  // case MD02:
+  //   M5.Display.drawString(
+  //       menu02[index].title, menu_x + (menu_w >> 1),
+  //       menu_y + index * menu_padding + (menu_h >> 1));
+  //   break;
 
-  case MD04:
-    M5.Display.drawString(
-        menu04[index].title, menu_x + (menu_w >> 1),
-        menu_y + index * menu_padding + (menu_h >> 1));
-    break;
+  // case MD03:
+  //   M5.Display.drawString(
+  //       menu03[index].title, menu_x + (menu_w >> 1),
+  //       menu_y + index * menu_padding + (menu_h >> 1));
+  //   break;
 
-  case MD05:
-    M5.Display.drawString(
-        menu05[index].title, menu_x + (menu_w >> 1),
-        menu_y + index * menu_padding + (menu_h >> 1));
-    break;
+  // case MD04:
+  //   M5.Display.drawString(
+  //       menu04[index].title, menu_x + (menu_w >> 1),
+  //       menu_y + index * menu_padding + (menu_h >> 1));
+  //   break;
 
-  case MD06:
-    M5.Display.drawString(
-        menu06[index].title, menu_x + (menu_w >> 1),
-        menu_y + index * menu_padding + (menu_h >> 1));
-    break;
-  }
+  // case MD05:
+  //   M5.Display.drawString(
+  //       menu05[index].title, menu_x + (menu_w >> 1),
+  //       menu_y + index * menu_padding + (menu_h >> 1));
+  //   break;
+
+  // case MD06:
+  //   M5.Display.drawString(
+  //       menu06[index].title, menu_x + (menu_w >> 1),
+  //       menu_y + index * menu_padding + (menu_h >> 1));
+  //   break;
+  // }
 }
 
 void select_menu(size_t index)
@@ -309,52 +314,62 @@ void select_menu(size_t index)
   cursor_index = index;
 }
 
-void exec_menu(bool holding)
+void exec_menu(int modeNo, size_t fnIndex)
 {
-  switch (MODE_ST)
+  // menuNo 1 to MD_END
+  if (modeNo < MD01 || modeNo > MD_END)
+    return;
+
+  if(menu[modeNo - 1][fnIndex].func != nullptr)
   {
-  case MD01:
-    if (menu01[cursor_index].func != nullptr)
-    {
-      menu01[cursor_index].func();
-    }
-    break;
-
-  case MD02:
-    if (menu02[cursor_index].func != nullptr)
-    {
-      menu02[cursor_index].func();
-    }
-    break;
-
-  case MD03:
-    if (menu03[cursor_index].func != nullptr)
-    {
-      menu03[cursor_index].func();
-    }
-    break;
-
-  case MD04:
-    if (menu04[cursor_index].func != nullptr)
-    {
-      menu04[cursor_index].func();
-    }
-    break;
-
-  case MD05:
-    if (menu05[cursor_index].func != nullptr)
-    {
-      menu05[cursor_index].func();
-    }
-    break;
-
-  case MD06:
-    if (menu06[cursor_index].func != nullptr)
-    {
-      menu06[cursor_index].func();
-    }
-    break;
+    menu[modeNo - 1][fnIndex].func();
   }
+
+  // switch (MODE_ST)
+  // {
+  // case MD01:
+  //   if (menu01[cursor_index].func != nullptr)
+  //   {
+  //     menu01[cursor_index].func();
+  //   }
+  //   break;
+
+  // case MD02:
+  //   if (menu02[cursor_index].func != nullptr)
+  //   {
+  //     menu02[cursor_index].func();
+  //   }
+  //   break;
+
+  // case MD03:
+  //   if (menu03[cursor_index].func != nullptr)
+  //   {
+  //     menu03[cursor_index].func();
+  //   }
+  //   break;
+
+  // case MD04:
+  //   if (menu04[cursor_index].func != nullptr)
+  //   {
+  //     menu04[cursor_index].func();
+  //   }
+  //   break;
+
+  // case MD05:
+  //   if (menu05[cursor_index].func != nullptr)
+  //   {
+  //     menu05[cursor_index].func();
+  //   }
+  //   break;
+
+  // case MD06:
+  //   if (menu06[cursor_index].func != nullptr)
+  //   {
+  //     menu06[cursor_index].func();
+  //   }
+  //   break;
+  // }
+
 }
 
 size_t get_menu_count(int mode)
@@ -437,11 +452,11 @@ void setup_MDxx(int mode)
   msg = get_MDxx_msg(mode);
   M5Disp(msg, 0, 0);
 
-  msg = "MENU  " + String(mode, 10) + " / " + String(MD_END, 10);
-  M5Disp(msg, menu_w + 20, 25);
-
   msg = "     prev         exit         next";
   M5Disp(msg, 0, M5.Display.height() - 20);
+
+  msg = "  MENU  " + String(mode, 10) + " / " + String(MD_END, 10);
+  menuDisp(msg, 0);
 
   for (size_t i = 0; i < menu_count; i++)
   {
@@ -483,7 +498,7 @@ void loop_MDxx()
         {
           if (detail.wasClicked())
           {
-            exec_menu(false);
+            exec_menu(MODE_ST, index);
           }
         }
       }
@@ -570,4 +585,36 @@ String get_MDxx_msg(int mode)
   }
 
   return msg;
+}
+
+void M5Disp(String msg, int32_t x, int32_t y)
+{
+  M5.Display.setTextScroll(false);
+  M5.Display.setTextDatum(0);
+  M5.Display.setCursor(x, y);
+  // SPACE for cleanning
+  M5.Display.print("                                  ");
+  ;
+  M5.Display.setCursor(x, y);
+  M5.Display.print(msg.c_str());
+}
+
+// lineNo : 0 to 7
+void menuDisp(String msg, int lineNo)
+{
+  if (lineNo < 0 || lineNo > 7)
+    return;
+
+  int32_t SX = 170;
+  int32_t SY = (lineNo + 1) * 25;
+
+  M5.Display.setTextScroll(false);
+  M5.Display.setTextDatum(0);
+
+  // SPACE for cleanning
+  M5.Display.setCursor(SX, SY);
+  M5.Display.print("                        ");
+
+  M5.Display.setCursor(SX, SY);
+  M5.Display.print(msg.c_str());
 }
