@@ -9,38 +9,37 @@ void disp_init();
 
 void draw_menu(size_t index, bool focus);
 void select_menu(size_t index);
-// void exec_menu(bool holding);
 void exec_menu(int modeNo, size_t fnIndex);
-size_t get_menu_count(int mode);
+// size_t get_menu_count(int mode);
 void MD00_disp();
 void M5Disp(String msg, int32_t x, int32_t y);
 String get_MDxx_msg(int mode);
 void menuDisp(String msg, int lineNo);
 
-static void func01_AUTOMODE_OFF();
-static void func01_AUTOMODE_FORWARD();
-static void func01_AUTOMODE_BACKWARD();
-static void func01_AUTOMODE_RND();
-static void func02_intval_01();
-static void func02_intval_02();
-static void func02_intval_03();
-static void func03_intvalRnd_01();
-static void func03_intvalRnd_02();
-static void func04_SDU_menu();
-static void func05_SDU_saveBin();
-static void func06_PowerOff();
+static void fn01_AUTOMODE_OFF();
+static void fn01_AUTOMODE_FORWARD();
+static void fn01_AUTOMODE_BACKWARD();
+static void fn01_AUTOMODE_RND();
+static void fn02_intval_01();
+static void fn02_intval_02();
+static void fn02_intval_03();
+static void fn03_intvalRnd_01();
+static void fn03_intvalRnd_02();
+static void fn04_SDU_menu();
+static void fn05_SDU_saveBin();
+static void fn06_PowerOff();
 
-String getMenuTitle(int menuNo, int num);
+// String getMenuTitle(int menuNo, int num);
 
 extern ImageViewer viewer;
 int MODE_ST = MDM2; // mode status = init
-static int menu_x = 0;
-static int menu_y = 25;
-static int menu_w = 120;
-static int menu_h = 40;
-static int menu_padding = 48;
+static int menu_x;
+static int menu_y;
+static int menu_w;
+static int menu_h;
+static int menu_padding;
 
-static void func01_AUTOMODE_OFF()
+static void fn01_AUTOMODE_OFF()
 {
   prtln("AutoMode set OFF", D1_SERI);
   viewer.setAutoMode(AUTOMODE_OFF);
@@ -51,7 +50,7 @@ static void func01_AUTOMODE_OFF()
   delay(100);
 }
 
-static void func01_AUTOMODE_FORWARD()
+static void fn01_AUTOMODE_FORWARD()
 {
   prtln("AutoMode set FORWARD", D1_SERI);
   viewer.setAutoMode(AUTOMODE_FORWARD);
@@ -61,7 +60,7 @@ static void func01_AUTOMODE_FORWARD()
   delay(100);
 }
 
-static void func01_AUTOMODE_BACKWARD()
+static void fn01_AUTOMODE_BACKWARD()
 {
   prtln("AutoMode set BACKWARD", D1_SERI);
   viewer.setAutoMode(AUTOMODE_BACKRWARD);
@@ -71,7 +70,7 @@ static void func01_AUTOMODE_BACKWARD()
   delay(100);
 }
 
-static void func01_AUTOMODE_RND()
+static void fn01_AUTOMODE_RND()
 {
   prtln("AutoMode set RND", D1_SERI);
   viewer.setAutoMode(AUTOMODE_RND);
@@ -81,7 +80,7 @@ static void func01_AUTOMODE_RND()
   delay(100);
 }
 
-static void func02_intval_01()
+static void fn02_intval_01()
 {
   prtln("Interval 3sec", D1_SERI);
   menuDisp("Interval", 2);
@@ -90,7 +89,7 @@ static void func02_intval_01()
   delay(100);
 }
 
-static void func02_intval_02()
+static void fn02_intval_02()
 {
   prtln("Interval 5sec", D1_SERI);
   menuDisp("Interval", 2);
@@ -99,7 +98,7 @@ static void func02_intval_02()
   delay(100);
 }
 
-static void func02_intval_03()
+static void fn02_intval_03()
 {
   prtln("Interval 10sec", D1_SERI);
   menuDisp("Interval", 2);
@@ -108,7 +107,7 @@ static void func02_intval_03()
   delay(100);
 }
 
-static void func03_intvalRnd_01()
+static void fn03_intvalRnd_01()
 {
   prtln("Interval Rnd Off", D1_SERI);
   menuDisp("Interval Rnd", 2);
@@ -117,7 +116,7 @@ static void func03_intvalRnd_01()
   delay(100);
 }
 
-static void func03_intvalRnd_02()
+static void fn03_intvalRnd_02()
 {
   prtln("Interval Rnd On", D1_SERI);
   menuDisp("Interval Rnd", 2);
@@ -126,7 +125,7 @@ static void func03_intvalRnd_02()
   delay(100);
 }
 
-static void func04_SDU_menu()
+static void fn04_SDU_menu()
 {
   prtln("Will Load SD-Updater menu.bin", D1_SERI);
   menuDisp(" Load menu.bin", 2);
@@ -137,7 +136,7 @@ static void func04_SDU_menu()
   FOREVER_LOOP();
 }
 
-static void func05_SDU_saveBin()
+static void fn05_SDU_saveBin()
 {
   prtln("Will Save bin_file to SD", D1_SERI);
   menuDisp(" Save bin to SD", 2);
@@ -152,75 +151,50 @@ static void func05_SDU_saveBin()
   delay(100);
 }
 
-static void func06_PowerOff()
+static void fn06_PowerOff()
 {
   prtln("PowerOff", D1_SERI);
-  // menuDisp(" Power Off", 2);
+  menuDisp(" Power Off", 2);
   String msg = "";
 
-  msg = getMenuTitle(1, 0);
-  menuDisp(msg, 1);
-
-  msg = getMenuTitle(1, 1);
-  menuDisp(msg, 2);
-
-  msg = getMenuTitle(1, 2);
-  menuDisp(msg, 3);
-
-  msg = getMenuTitle(1, 3);
-  menuDisp(msg, 4);
-
-  msg = getMenuTitle(2, 0);
-  menuDisp(msg, 5);
-
-  msg = getMenuTitle(2, 1);
-  menuDisp(msg, 6);
-
-  msg = getMenuTitle(3, 0);
-  menuDisp(msg, 7);
-
-  // delay(3000);
-  // M5.Power.powerOff();
-  // FOREVER_LOOP;
+  delay(3000);
+  M5.Power.powerOff();
+  FOREVER_LOOP;
 }
 
 /// メニュー用の構造体。タイトルの文字列と対応する関数のポインタを持つ
-struct menu_item_t
+struct menu_item
 {
-  const char *title;
+  const char *btnName;
   void (*func)(void);
 };
 
-/// メニュー定義
-static const menu_item_t menu01[] = {
-    {"off", func01_AUTOMODE_OFF},
-    {"forward", func01_AUTOMODE_FORWARD},
-    {"backward", func01_AUTOMODE_BACKWARD},
-    {"random", func01_AUTOMODE_RND},
+/// -------------- メニュー定義: --- menu01  to menu06 --------------
+static const menu_item menu01[] = {
+    {"off", fn01_AUTOMODE_OFF},
+    {"forward", fn01_AUTOMODE_FORWARD},
+    {"backward", fn01_AUTOMODE_BACKWARD},
+    {"random", fn01_AUTOMODE_RND},
 };
-
-static const menu_item_t menu02[] = {
-    {"3sec", func02_intval_01},
-    {"5sec", func02_intval_02},
-    {"10sec", func02_intval_03},
+static const menu_item menu02[] = {
+    {"3sec", fn02_intval_01},
+    {"5sec", fn02_intval_02},
+    {"10sec", fn02_intval_03},
 };
-
-static const menu_item_t menu03[] = {
-    {"off", func03_intvalRnd_01},
-    {"on", func03_intvalRnd_02},
+static const menu_item menu03[] = {
+    {"off", fn03_intvalRnd_01},
+    {"on", fn03_intvalRnd_02},
 };
-
-static const menu_item_t menu04[] = {
-    {"SDU-menu", func04_SDU_menu},
+static const menu_item menu04[] = {
+    {"SDU-menu", fn04_SDU_menu},
 };
-
-static const menu_item_t menu05[] = {
-    {"SaveBin", func05_SDU_saveBin},
+static const menu_item menu05[] = {
+    {"SaveBin", fn05_SDU_saveBin},
 };
-
-static const menu_item_t menu06[] = {
-    {"PowerOff", func06_PowerOff},
+static const menu_item menu06[] = {
+    {"PowerOff", fn06_PowerOff},
 };
+static const menu_item *menu[] = {menu01, menu02, menu03, menu04, menu05, menu06};
 
 /// メニュー要素数
 static constexpr const size_t menu01_count = sizeof(menu01) / sizeof(menu01[0]);
@@ -230,22 +204,29 @@ static constexpr const size_t menu04_count = sizeof(menu04) / sizeof(menu04[0]);
 static constexpr const size_t menu05_count = sizeof(menu05) / sizeof(menu05[0]);
 static constexpr const size_t menu06_count = sizeof(menu06) / sizeof(menu06[0]);
 static constexpr const size_t menuCount[] = {menu01_count, menu02_count, menu03_count, menu04_count, menu05_count, menu06_count};
-static size_t menu_count = menuCount[0];
+// ---------------------------------------------------------------------------------
+static size_t btn_len = menuCount[0]; 
+size_t cursor_index = 0;    /// 現在カーソルのある位置
 
-/// 現在カーソルのある位置
-size_t cursor_index = 0;
 
-static const menu_item_t *menu[] = {menu01, menu02, menu03, menu04, menu05, menu06};
+// size_t getMenuCount2(int mode)
+// {
+//   if (mode < MD01 || mode > MD_END)
+//     return 0;
 
-String getMenuTitle(int modeNo, int num)
-{ // menuNo 1 to MD_END
-  if (modeNo < MD01 || modeNo > MD_END)
-    return "";
+//   size_t count = sizeof(*menu[mode - 1]) / (sizeof(menu[mode - 1][0].btnName) + sizeof(menu[mode - 1][0].func));
+//   return count;
+// }
 
-  String msg = String(menu[modeNo - 1][num].title);
-  prtln(msg, D1_SERI);
-  return msg;
-}
+// String getMenuTitle(int modeNo, int num)
+// { // menuNo 1 to MD_END
+//   if (modeNo < MD01 || modeNo > MD_END)
+//     return "";
+
+//   String msg = String(menu[modeNo - 1][num].btnName);
+//   prtln(msg, D1_SERI);
+//   return msg;
+// }
 
 
 void draw_menu(size_t index, bool focus)
@@ -263,47 +244,10 @@ void draw_menu(size_t index, bool focus)
                           focus ? ~baseColor : baseColor);
 
   M5.Display.drawString(
-      getMenuTitle(MODE_ST, index).c_str(), menu_x + (menu_w >> 1),
+      // getMenuTitle(MODE_ST, index).c_str(),
+      menu[MODE_ST - 1][index].btnName,
+      menu_x + (menu_w >> 1),
       menu_y + index * menu_padding + (menu_h >> 1));
-
-  // switch (MODE_ST)
-  // {
-  // case MD01:
-  //   M5.Display.drawString(
-  //       menu01[index].title, menu_x + (menu_w >> 1),
-  //       menu_y + index * menu_padding + (menu_h >> 1));
-  //   break;
-
-  // case MD02:
-  //   M5.Display.drawString(
-  //       menu02[index].title, menu_x + (menu_w >> 1),
-  //       menu_y + index * menu_padding + (menu_h >> 1));
-  //   break;
-
-  // case MD03:
-  //   M5.Display.drawString(
-  //       menu03[index].title, menu_x + (menu_w >> 1),
-  //       menu_y + index * menu_padding + (menu_h >> 1));
-  //   break;
-
-  // case MD04:
-  //   M5.Display.drawString(
-  //       menu04[index].title, menu_x + (menu_w >> 1),
-  //       menu_y + index * menu_padding + (menu_h >> 1));
-  //   break;
-
-  // case MD05:
-  //   M5.Display.drawString(
-  //       menu05[index].title, menu_x + (menu_w >> 1),
-  //       menu_y + index * menu_padding + (menu_h >> 1));
-  //   break;
-
-  // case MD06:
-  //   M5.Display.drawString(
-  //       menu06[index].title, menu_x + (menu_w >> 1),
-  //       menu_y + index * menu_padding + (menu_h >> 1));
-  //   break;
-  // }
 }
 
 void select_menu(size_t index)
@@ -320,93 +264,17 @@ void exec_menu(int modeNo, size_t fnIndex)
   if (modeNo < MD01 || modeNo > MD_END)
     return;
 
-  if(menu[modeNo - 1][fnIndex].func != nullptr)
+  if (menu[modeNo - 1][fnIndex].func != nullptr)
   {
     menu[modeNo - 1][fnIndex].func();
   }
-
-  // switch (MODE_ST)
-  // {
-  // case MD01:
-  //   if (menu01[cursor_index].func != nullptr)
-  //   {
-  //     menu01[cursor_index].func();
-  //   }
-  //   break;
-
-  // case MD02:
-  //   if (menu02[cursor_index].func != nullptr)
-  //   {
-  //     menu02[cursor_index].func();
-  //   }
-  //   break;
-
-  // case MD03:
-  //   if (menu03[cursor_index].func != nullptr)
-  //   {
-  //     menu03[cursor_index].func();
-  //   }
-  //   break;
-
-  // case MD04:
-  //   if (menu04[cursor_index].func != nullptr)
-  //   {
-  //     menu04[cursor_index].func();
-  //   }
-  //   break;
-
-  // case MD05:
-  //   if (menu05[cursor_index].func != nullptr)
-  //   {
-  //     menu05[cursor_index].func();
-  //   }
-  //   break;
-
-  // case MD06:
-  //   if (menu06[cursor_index].func != nullptr)
-  //   {
-  //     menu06[cursor_index].func();
-  //   }
-  //   break;
-  // }
-
 }
 
-size_t get_menu_count(int mode)
-{
-  size_t tmp = 1;
-
-  switch (mode)
-  {
-  case MD01:
-    tmp = menu01_count;
-    break;
-
-  case MD02:
-    tmp = menu02_count;
-    break;
-  case MD03:
-    tmp = menu03_count;
-    break;
-
-  case MD04:
-    tmp = menu04_count;
-    break;
-
-  case MD05:
-    tmp = menu05_count;
-    break;
-
-  case MD06:
-    tmp = menu06_count;
-    break;
-
-  default:
-    tmp = 1;
-  }
-
-  return tmp;
-}
+// size_t get_menu_count(int mode)
+// {
+//   size_t tmp = menuCount[mode - 1];
+//   return tmp;
+// }
 
 void disp_init()
 {
@@ -431,14 +299,21 @@ void setup_MDxx(int mode)
   M5.Display.fillScreen(TFT_BLACK);
 
   cursor_index = 0;
-  menu_count = get_menu_count(mode);
+  // menu_count = get_menu_count(mode);
+  
+  btn_len = menuCount[mode - 1];
+  prtln("btn_len = " + String(btn_len, 10), D1_SERI);
+
+  // size_t menu_count2 = getMenuCount2(mode);
+  // prtln("menu_count2 = " + String(menu_count2, 10), D1_SERI);
+
   menu_x = 0;
-  menu_y = M_Y[menu_count - 1];
+  menu_y = M_Y[btn_len - 1];
   menu_w = M5.Display.width() >> 1;
-  menu_h = M_H[menu_count - 1];
-  menu_padding = M_PADDING[menu_count - 1];
+  menu_h = M_H[btn_len - 1];
+  menu_padding = M_PADDING[btn_len - 1];
   prtln("mode = " + String(mode, 10), D1_SERI);
-  prtln("menu_count = " + String(menu_count, 10), D1_SERI);
+  prtln("btn_len = " + String(btn_len, 10), D1_SERI);
   prtln("menu_x = " + String(menu_x, 10), D1_SERI);
   prtln("menu_y = " + String(menu_y, 10), D1_SERI);
   prtln("menu_w = " + String(menu_w, 10), D1_SERI);
@@ -458,7 +333,7 @@ void setup_MDxx(int mode)
   msg = "  MENU  " + String(mode, 10) + " / " + String(MD_END, 10);
   menuDisp(msg, 0);
 
-  for (size_t i = 0; i < menu_count; i++)
+  for (size_t i = 0; i < btn_len; i++)
   {
     draw_menu(i, false);
   }
@@ -487,7 +362,7 @@ void loop_MDxx()
     if (((size_t)detail.x - menu_x) < menu_w)
     {
       size_t index = (detail.y - menu_y) / menu_padding;
-      if (index < menu_count)
+      if (index < btn_len)
       {
         if (detail.wasPressed())
         {
