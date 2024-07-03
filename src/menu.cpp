@@ -10,10 +10,9 @@ void disp_init();
 void draw_menu(size_t index, bool focus);
 void select_menu(size_t index);
 void exec_menu(int modeNo, size_t fnIndex);
-// size_t get_menu_count(int mode);
 void MD00_disp();
 void M5Disp(String msg, int32_t x, int32_t y);
-String get_MDxx_msg(int mode);
+String getMenu_msg(int mode);
 void menuDisp(String msg, int lineNo);
 
 static void fn01_AUTOMODE_OFF();
@@ -28,8 +27,6 @@ static void fn03_intvalRnd_02();
 static void fn04_SDU_menu();
 static void fn05_SDU_saveBin();
 static void fn06_PowerOff();
-
-// String getMenuTitle(int menuNo, int num);
 
 extern ImageViewer viewer;
 int MODE_ST = MDM2; // mode status = init
@@ -169,7 +166,7 @@ struct menu_item
   void (*func)(void);
 };
 
-/// -------------- メニュー定義: --- menu01  to menu06 --------------
+/// ------------ メニュー定義: --- menu01  to menu06 --------------
 static const menu_item menu01[] = {
     {"off", fn01_AUTOMODE_OFF},
     {"forward", fn01_AUTOMODE_FORWARD},
@@ -196,38 +193,60 @@ static const menu_item menu06[] = {
 };
 static const menu_item *menu[] = {menu01, menu02, menu03, menu04, menu05, menu06};
 
-/// メニュー要素数
-static constexpr const size_t menu01_count = sizeof(menu01) / sizeof(menu01[0]);
-static constexpr const size_t menu02_count = sizeof(menu02) / sizeof(menu02[0]);
-static constexpr const size_t menu03_count = sizeof(menu03) / sizeof(menu03[0]);
-static constexpr const size_t menu04_count = sizeof(menu04) / sizeof(menu04[0]);
-static constexpr const size_t menu05_count = sizeof(menu05) / sizeof(menu05[0]);
-static constexpr const size_t menu06_count = sizeof(menu06) / sizeof(menu06[0]);
-static constexpr const size_t menuCount[] = {menu01_count, menu02_count, menu03_count, menu04_count, menu05_count, menu06_count};
+/// 要素数
+static constexpr const size_t btn01_len = sizeof(menu01) / sizeof(menu01[0]);
+static constexpr const size_t btn02_len = sizeof(menu02) / sizeof(menu02[0]);
+static constexpr const size_t btn03_len = sizeof(menu03) / sizeof(menu03[0]);
+static constexpr const size_t btn04_len = sizeof(menu04) / sizeof(menu04[0]);
+static constexpr const size_t btn05_len = sizeof(menu05) / sizeof(menu05[0]);
+static constexpr const size_t btn06_len = sizeof(menu06) / sizeof(menu06[0]);
+static constexpr const size_t BTN_LEN[] = {btn01_len, btn02_len, btn03_len, btn04_len, btn05_len, btn06_len};
 // ---------------------------------------------------------------------------------
-static size_t btn_len = menuCount[0]; 
-size_t cursor_index = 0;    /// 現在カーソルのある位置
 
+String getMenu_msg(int mode)
+{
+  String msg = "";
+  const String AUTOMODE[4] = {"off", "forward", "backward", "random"};
 
-// size_t getMenuCount2(int mode)
-// {
-//   if (mode < MD01 || mode > MD_END)
-//     return 0;
+  switch (mode)
+  {
+  case MD01:
+    msg = "AutoMode : " + AUTOMODE[viewer.getAutoMode()];
+    break;
 
-//   size_t count = sizeof(*menu[mode - 1]) / (sizeof(menu[mode - 1][0].btnName) + sizeof(menu[mode - 1][0].func));
-//   return count;
-// }
+  case MD02:
+    msg = "AutoMode Interval : " + String(viewer.getIntval() / 1000, 10) + "sec";
+    break;
 
-// String getMenuTitle(int modeNo, int num)
-// { // menuNo 1 to MD_END
-//   if (modeNo < MD01 || modeNo > MD_END)
-//     return "";
+  case MD03:
+    if (viewer.getIntvalRnd())
+      msg = "AutoMode Interval Rnd : on";
+    else
+      msg = "AutoMode Interval Rnd : off";
+    break;
 
-//   String msg = String(menu[modeNo - 1][num].btnName);
-//   prtln(msg, D1_SERI);
-//   return msg;
-// }
+  case MD04:
+    msg = "Load SD-Updater menu.bin";
+    break;
 
+  case MD05:
+    msg = "Save bin-file to SD";
+    break;
+
+  case MD06:
+    msg = "Power Off";
+    break;
+
+  default:
+    break;
+  }
+
+  return msg;
+}
+// ---------------------------------------------------------------------------------
+
+static size_t btn_len = BTN_LEN[0]; // ボタン個数
+size_t cursor_index = 0;            // 現在カーソルのあるボタン位置
 
 void draw_menu(size_t index, bool focus)
 {
@@ -244,7 +263,6 @@ void draw_menu(size_t index, bool focus)
                           focus ? ~baseColor : baseColor);
 
   M5.Display.drawString(
-      // getMenuTitle(MODE_ST, index).c_str(),
       menu[MODE_ST - 1][index].btnName,
       menu_x + (menu_w >> 1),
       menu_y + index * menu_padding + (menu_h >> 1));
@@ -260,7 +278,7 @@ void select_menu(size_t index)
 
 void exec_menu(int modeNo, size_t fnIndex)
 {
-  // menuNo 1 to MD_END
+  // menuNo MD01 to MD_END
   if (modeNo < MD01 || modeNo > MD_END)
     return;
 
@@ -269,12 +287,6 @@ void exec_menu(int modeNo, size_t fnIndex)
     menu[modeNo - 1][fnIndex].func();
   }
 }
-
-// size_t get_menu_count(int mode)
-// {
-//   size_t tmp = menuCount[mode - 1];
-//   return tmp;
-// }
 
 void disp_init()
 {
@@ -299,13 +311,9 @@ void setup_MDxx(int mode)
   M5.Display.fillScreen(TFT_BLACK);
 
   cursor_index = 0;
-  // menu_count = get_menu_count(mode);
-  
-  btn_len = menuCount[mode - 1];
-  prtln("btn_len = " + String(btn_len, 10), D1_SERI);
 
-  // size_t menu_count2 = getMenuCount2(mode);
-  // prtln("menu_count2 = " + String(menu_count2, 10), D1_SERI);
+  btn_len = BTN_LEN[mode - 1];
+  prtln("btn_len = " + String(btn_len, 10), D1_SERI);
 
   menu_x = 0;
   menu_y = M_Y[btn_len - 1];
@@ -324,7 +332,7 @@ void setup_MDxx(int mode)
   // M5.Display.startWrite();
   // M5.Display.setEpdMode(epd_mode_t::epd_fastest);
 
-  msg = get_MDxx_msg(mode);
+  msg = getMenu_msg(mode);
   M5Disp(msg, 0, 0);
 
   msg = "     prev         exit         next";
@@ -419,47 +427,6 @@ void MD00_disp()
   M5.Display.printf("(BtnA)click: backward image\n\n");
   M5.Display.printf("(BtnB) hold: setting menu\n\n");
   M5.Display.printf("(BtnC)click: forward image\n");
-}
-
-String get_MDxx_msg(int mode)
-{
-  const String AUTOMODE[4] = {"off", "forward", "backward", "random"};
-  String msg = "";
-
-  switch (mode)
-  {
-  case MD01:
-    msg = "AutoMode : " + AUTOMODE[viewer.getAutoMode()];
-    break;
-
-  case MD02:
-    msg = "AutoMode Interval : " + String(viewer.getIntval() / 1000, 10) + "sec";
-    break;
-
-  case MD03:
-    if (viewer.getIntvalRnd())
-      msg = "AutoMode Interval Rnd : on";
-    else
-      msg = "AutoMode Interval Rnd : off";
-    break;
-
-  case MD04:
-    msg = "Load SD-Updater menu.bin";
-    break;
-
-  case MD05:
-    msg = "Save bin-file to SD";
-    break;
-
-  case MD06:
-    msg = "Power Off";
-    break;
-
-  default:
-    break;
-  }
-
-  return msg;
 }
 
 void M5Disp(String msg, int32_t x, int32_t y)
