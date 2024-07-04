@@ -1,23 +1,29 @@
 #ifndef _MENU_HPP_
 #define _MENU_HPP_
 
-// mode status definition 
-#define MDM2   -2    // init
-#define MDM1   -1    // setup start
-#define MD00   0     // setup done (Normal mode)
-#define MD01   1     // MD01  AutoMode
-#define MD02   2     // MD02  automode interval
-#define MD03   3     // MD03  automode intval Rnd
-#define MD04   4     // MD04  load menu.bin
-#define MD05   5     // MD06  save bin to SD
-#define MD06   6     // MD06  power off
-#define MD_END 6     // end of mode 
-
+// mode status definition
+#define MODEM2 -2  // init
+#define MODEM1 -1  // setup start
+#define MODE00 0   // setup done (Normal mode)
+#define MENU01 1   // MENU01  AutoMode
+#define MENU02 2   // MENU02  automode interval
+#define MENU03 3   // MENU03  automode intval Rnd
+#define MENU04 4   // MENU04  load menu.bin
+#define MENU05 5   // MENU06  save bin to SD
+#define MENU06 6   // MENU06  power off
+#define MD_END MENU06 // end of mode
 
 extern int MODE_ST;
-extern void setup_MDxx(int mode);
-extern void loop_MDxx();
+extern void setup_menu(int mode);
+extern void loop_menu();
 extern void disp_init();
+
+// メニュー用構造体。タイトルの文字列と対応する関数のポインタを持つ
+struct menu_item
+{
+  const char *btnName;
+  void (*func)(void);
+};
 
 // ----------------------------------------------------------------------------
 #endif //_MENU_HPP_

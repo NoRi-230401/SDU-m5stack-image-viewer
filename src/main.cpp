@@ -5,8 +5,9 @@
 
 ImageViewer viewer;
 
-void setup(void) {
-    MODE_ST = MDM1;
+void setup(void)
+{
+    MODE_ST = MODEM1;
 
     auto cfg = M5.config();
     M5.begin(cfg);
@@ -16,30 +17,34 @@ void setup(void) {
     M5.Display.setTextScroll(true);
     delay(500);
 
-    if (!viewer.begin()) {
+    if (!viewer.begin())
         FOREVER_LOOP();
-    }
-    
-    MODE_ST = MD00;
+
+    MODE_ST = MODE00;
 }
 
-void loop(void) {
-    if (MODE_ST == MD00) {
+void loop(void)
+{
+    if (MODE_ST == MODE00)
+    {
         M5.update();
-        if (M5.BtnB.wasHold()) {
-            prtln("BtnB was Hold, go for  SETTING MENU", D1_SERI);
 
-            MODE_ST = MD01;  // menu mode first
-            disp_init();
-            setup_MDxx(MD01);
-            delay(500);
-        } else {
+        if (!M5.BtnB.wasHold())
+        {
             viewer.update();
             delay(10);
         }
-        delay(1);
-
-    } else {
-        loop_MDxx();    // loop for SETTING MENU
+        else
+        {
+            prtln("BtnB was Hold, go to SETTING MENU", D1_SERI);
+            MODE_ST = MENU01;    // SETTIN MENU mode first
+            disp_init();
+            setup_menu(MENU01);
+            delay(500);
+        }
+    }
+    else
+    {
+        loop_menu();            // loop for SETTING MENU
     }
 }
