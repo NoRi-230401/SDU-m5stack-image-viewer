@@ -43,7 +43,7 @@ inline int32_t getTextAreaHeight(void)
 #include <Arduino_JSON.h>
 #include <string.h>
 const char *ImageViewer::VERSION = "v105-mod-V202";
-const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView.json";
+const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
 String ImageViewer::DATA_DIR("/Pictures");
 const char *ImageViewer::KEY_DATA_DIR = "DataDir";
 const char *ImageViewer::KEY_AUTO_MODE = "AutoMode";
@@ -272,10 +272,7 @@ bool ImageViewer::setImageFileList(const String &path)
     {
         if (!f.isDirectory() && isImageFile(f))
         {
-            // ---- mod by NoRi ---
-            // this->_imageFiles[this->_nImageFiles] = DATA_DIR + f.name();
             this->_imageFiles[this->_nImageFiles] = DATA_DIR + "/" + f.name();
-            // -----------------------------------------------------------------
             ++this->_nImageFiles;
         }
         f = root.openNextFile();
@@ -528,44 +525,44 @@ bool ImageViewer::parse(const char *config)
           String(this->_isAutoModeIntvalRnd ? "true" : "false");
     prtln(msg);
 
-    if (o.hasOwnProperty(KEY_AUTO_ROTATION))
-    {
-        this->_isAutoRotation = (bool)o[KEY_AUTO_ROTATION];
-    }
-    msg = " AutoRotation: " + String(this->_isAutoRotation ? "true" : "false");
-    prtln(msg);
+    // if (o.hasOwnProperty(KEY_AUTO_ROTATION))
+    // {
+    //     this->_isAutoRotation = (bool)o[KEY_AUTO_ROTATION];
+    // }
+    // msg = " AutoRotation: " + String(this->_isAutoRotation ? "true" : "false");
+    // prtln(msg);
 
-    if (o.hasOwnProperty(KEY_ORIENTATION))
-    {
-        JSONVar orientationVar = o[KEY_ORIENTATION];
-        if (JSON.typeof(orientationVar) == "number")
-        {
-            int orientationInt = (int)orientationVar;
-            if (0 <= orientationInt && orientationInt <= 7)
-            {
-                this->_orientation = orientationInt;
-            }
-            else
-            {
-                this->_orientation = M5.Lcd.getRotation();
-                M5_LOGE("Invalid Orientation Value: %d", orientationInt);
-            }
-        }
-        else
-        {
-            this->_orientation = M5.Lcd.getRotation();
-            M5_LOGE("Illegal Orientation Type: %s, Value: %s",
-                    JSON.typeof(orientationVar).c_str(),
-                    JSONVar::stringify(orientationVar).c_str());
-        }
-    }
-    else
-    {
-        this->_orientation = M5.Lcd.getRotation();
-        M5_LOGW("Default Orientation is not found");
-    }
-    M5.Lcd.printf(" Orientation: %s", getOrientationString(this->_orientation));
-    M5.Lcd.println();
+    // if (o.hasOwnProperty(KEY_ORIENTATION))
+    // {
+    //     JSONVar orientationVar = o[KEY_ORIENTATION];
+    //     if (JSON.typeof(orientationVar) == "number")
+    //     {
+    //         int orientationInt = (int)orientationVar;
+    //         if (0 <= orientationInt && orientationInt <= 7)
+    //         {
+    //             this->_orientation = orientationInt;
+    //         }
+    //         else
+    //         {
+    //             this->_orientation = M5.Lcd.getRotation();
+    //             M5_LOGE("Invalid Orientation Value: %d", orientationInt);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         this->_orientation = M5.Lcd.getRotation();
+    //         M5_LOGE("Illegal Orientation Type: %s, Value: %s",
+    //                 JSON.typeof(orientationVar).c_str(),
+    //                 JSONVar::stringify(orientationVar).c_str());
+    //     }
+    // }
+    // else
+    // {
+    //     this->_orientation = M5.Lcd.getRotation();
+    //     M5_LOGW("Default Orientation is not found");
+    // }
+    // M5.Lcd.printf(" Orientation: %s", getOrientationString(this->_orientation));
+    // M5.Lcd.println();
 
     // --- DATA_DIR ---
     if (o.hasOwnProperty(KEY_DATA_DIR))

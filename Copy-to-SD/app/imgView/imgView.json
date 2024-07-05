@@ -1,8 +1,7 @@
 {
-  "AutoMode": false,
+  "AutoMode": 0,
   "AutoModeInterval": 5000,
   "AutoModeRandomized": false,
-  "AutoRotation": true,
-	"DataDir" : "/Pictures"
+  "DataDir" : "/Pictures"
 }
 

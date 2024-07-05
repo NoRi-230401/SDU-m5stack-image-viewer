@@ -2,8 +2,8 @@
 #define _MENU_HPP_
 
 // mode status definition
-#define MODEM2 -2  // init
-#define MODEM1 -1  // setup start
+#define MODE_M2 -2  // init
+#define MODE_M1 -1  // setup start
 #define MODE00 0   // setup done (Normal mode)
 #define MENU01 1   // MENU01  AutoMode
 #define MENU02 2   // MENU02  automode interval
@@ -11,7 +11,7 @@
 #define MENU04 4   // MENU04  load menu.bin
 #define MENU05 5   // MENU06  save bin to SD
 #define MENU06 6   // MENU06  power off
-#define MD_END MENU06 // end of mode
+#define MENU_END MENU06 // end of mode
 
 extern int MODE_ST;
 extern void setup_menu(int mode);

@@ -7,7 +7,7 @@ ImageViewer viewer;
 
 void setup(void)
 {
-    MODE_ST = MODEM1;
+    MODE_ST = MODE_M1;
 
     auto cfg = M5.config();
     M5.begin(cfg);
