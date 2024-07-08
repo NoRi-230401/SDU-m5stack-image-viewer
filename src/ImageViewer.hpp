@@ -60,7 +60,6 @@ public:
 
     ImageViewer(uint8_t isAutoMode = DEFAULT_AUTO_MODE,
                 uint32_t autoModeInterval = DEFAULT_AUTO_MODE_INTERVAL_MS,
-                // bool isAutoModeRandomize = DEFAULT_AUTO_MODE_INTVAL_RND,
                 bool isAutoModeIntvalRnd = DEFAULT_AUTO_MODE_INTVAL_RND,
                 bool isAutoRotation = DEFAULT_AUTO_ROTATION);
     virtual ~ImageViewer(void);

@@ -2,7 +2,9 @@
 #include "menu.hpp"
 #include "util.hpp"
 
-inline int32_t getDirection(void)
+int32_t getDirection(void);
+
+int32_t getDirection(void)
 {
     if (M5.BtnA.wasClicked())
     {
@@ -20,25 +22,25 @@ inline int32_t getDirection(void)
     }
 }
 
-inline int32_t getTextAreaX(void)
-{
-    return 0;
-}
+// inline int32_t getTextAreaX(void)
+// {
+//     return 0;
+// }
 
-inline int32_t getTextAreaY(void)
-{
-    return 0;
-}
+// inline int32_t getTextAreaY(void)
+// {
+//     return 0;
+// }
 
-inline int32_t getTextAreaWidth(void)
-{
-    return M5.Lcd.width();
-}
+// inline int32_t getTextAreaWidth(void)
+// {
+//     return M5.Lcd.width();
+// }
 
-inline int32_t getTextAreaHeight(void)
-{
-    return M5.Lcd.height();
-}
+// inline int32_t getTextAreaHeight(void)
+// {
+//     return M5.Lcd.height();
+// }
 
 #include <Arduino_JSON.h>
 #include <string.h>

@@ -200,7 +200,7 @@ String getMenu_msg(int mode)
   return msg;
 }
 
-// exitして、メインに戻ったときの表示
+// exitして、MODE00に戻ったときの表示
 void MODE00_disp()
 {
   M5.Display.setTextScroll(true);
@@ -210,6 +210,25 @@ void MODE00_disp()
   M5.Display.printf("(BtnC)click: forward image\n");
 }
 // --　ここまで個別のアプリ毎に対応必要 -------------------------------------
+
+void menuPrt(String msg, int lineNo)
+{ // prt msg for right-area of menu (lineNo : 0 to 7)
+  if (lineNo < 0 || lineNo > 7)
+    return;
+
+  int32_t SX = 170;
+  int32_t SY = (lineNo + 1) * 25;
+
+  M5.Display.setTextScroll(false);
+  M5.Display.setTextDatum(0);
+
+  // SPACE for cleanning
+  M5.Display.setCursor(SX, SY);
+  M5.Display.print("                        ");
+
+  M5.Display.setCursor(SX, SY);
+  M5.Display.print(msg.c_str());
+}
 
 void setup_menu(int mode);
 void loop_menu();
@@ -227,25 +246,6 @@ static int menu_y;
 static int menu_w;
 static int menu_h;
 static int menu_padding;
-
-void menuPrt(String msg, int lineNo)
-{ // Menu display Message for lineNo : 0 to 7
-  if (lineNo < 0 || lineNo > 7)
-    return;
-
-  int32_t SX = 170;
-  int32_t SY = (lineNo + 1) * 25;
-
-  M5.Display.setTextScroll(false);
-  M5.Display.setTextDatum(0);
-
-  // SPACE for cleanning
-  M5.Display.setCursor(SX, SY);
-  M5.Display.print("                        ");
-
-  M5.Display.setCursor(SX, SY);
-  M5.Display.print(msg.c_str());
-}
 
 void draw_menu(size_t index, bool focus)
 {
