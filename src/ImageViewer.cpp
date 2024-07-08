@@ -51,21 +51,35 @@ const char *ImageViewer::KEY_DATA_DIR = "DataDir";
 const char *ImageViewer::KEY_AUTO_MODE = "AutoMode";
 const char *ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
 const char *ImageViewer::KEY_AUTO_MODE_INTVAL_RND = "AutoModeRandomized";
-const char *ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
-const char *ImageViewer::KEY_ORIENTATION = "Orientation";
-const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
+// const char *ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
+// const char *ImageViewer::KEY_ORIENTATION = "Orientation";
+// const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
 static const char *EXT_JPG = ".jpg";
 static const char *EXT_JPEG = ".jpeg";
 static const char *EXT_BMP = ".bmp";
 static const char *EXT_PNG = ".png";
 
-ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval,
-                         bool isAutoModeIntvalRnd, bool isAutoRotation)
-    : _orientation(0),
+// ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval, bool isAutoModeIntvalRnd, bool isAutoRotation)
+//     : _orientation(0),
+//       _isAutoMode(isAutoMode),
+//       _autoModeInterval(autoModeInterval),
+//       _isAutoModeIntvalRnd(isAutoModeIntvalRnd),
+//       _isAutoRotation(isAutoRotation),
+//       _imageFiles{""},
+//       _nImageFiles(0),
+//       _pos(0),
+//       _prevUpdate(0),
+//       _interval(autoModeInterval)
+// {
+//     randomSeed(analogRead(0));
+// }
+
+ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval, bool isAutoModeIntvalRnd)
+    : //   _orientation(0),
       _isAutoMode(isAutoMode),
       _autoModeInterval(autoModeInterval),
       _isAutoModeIntvalRnd(isAutoModeIntvalRnd),
-      _isAutoRotation(isAutoRotation),
+      //   _isAutoRotation(isAutoRotation),
       _imageFiles{""},
       _nImageFiles(0),
       _pos(0),
@@ -206,7 +220,7 @@ bool ImageViewer::update(void)
         return true;
     }
 
-    else if (INTVAL_RND && (t - this->_prevUpdate >= this->_interval2))
+    else if (INTVAL_RND && (t - this->_prevUpdate >= this->_intervalRnd))
     {
         switch (AUTO_MODE)
         {
@@ -240,11 +254,11 @@ bool ImageViewer::update(void)
         prtln("imgLen = " + String(imgLen, 10), D1_SERI);
         prtln("AUTO_MODE = " + String(AUTO_MODE, 10), D1_SERI);
         prtln("prvUpdate = " + String(this->_prevUpdate, 10), D1_SERI);
-        prtln("interval2 = " + String(this->_interval2, 10), D1_SERI);
+        prtln("interval2 = " + String(this->_intervalRnd, 10), D1_SERI);
 
-        this->_interval2 = random(this->_interval);
-        if (this->_interval2 <= 100)
-            this->_interval2 = 100;
+        this->_intervalRnd = random(this->_interval);
+        if (this->_intervalRnd <= 100)
+            this->_intervalRnd = 100;
 
         this->_prevUpdate = t;
         return true;
@@ -314,18 +328,18 @@ bool ImageViewer::setImageFileList(const String &path)
     return true;
 }
 
-bool ImageViewer::updateOrientation(float threshold)
-{
-    const uint8_t o = detectOrientation(threshold);
-    if (this->_orientation != o)
-    {
-        M5_LOGD("Change Orientation: %d -> %d", this->_orientation, o);
-        this->_orientation = o;
-        M5.Lcd.setRotation(this->_orientation);
-        return true;
-    }
-    return false;
-}
+// bool ImageViewer::updateOrientation(float threshold)
+// {
+//     const uint8_t o = detectOrientation(threshold);
+//     if (this->_orientation != o)
+//     {
+//         M5_LOGD("Change Orientation: %d -> %d", this->_orientation, o);
+//         this->_orientation = o;
+//         M5.Lcd.setRotation(this->_orientation);
+//         return true;
+//     }
+//     return false;
+// }
 
 uint8_t ImageViewer::getAutoMode()
 {
@@ -335,7 +349,7 @@ uint8_t ImageViewer::getAutoMode()
 void ImageViewer::setAutoMode(uint8_t mode)
 {
     _isAutoMode = mode;
-    _interval2 = 0;
+    _intervalRnd = 0;
 }
 
 uint32_t ImageViewer::getIntval()
@@ -346,7 +360,7 @@ uint32_t ImageViewer::getIntval()
 void ImageViewer::setIntval(uint32_t intval)
 {
     _interval = intval;
-    _interval2 = 0;
+    _intervalRnd = 0;
 }
 
 bool ImageViewer::getIntvalRnd()
@@ -357,7 +371,7 @@ bool ImageViewer::getIntvalRnd()
 void ImageViewer::setIntvalRnd(bool intvalRnd)
 {
     _isAutoModeIntvalRnd = intvalRnd;
-    _interval2 = 0;
+    _intervalRnd = 0;
 }
 
 void ImageViewer::showImage(const String images[], size_t p)
@@ -440,32 +454,32 @@ bool ImageViewer::isImageFile(const File &f) const
     return isJpeg(name) || isPng(name) || isBmp(name);
 }
 
-uint8_t ImageViewer::detectOrientation(float threshold)
-{
-    if (M5.Imu.isEnabled())
-    {
-        float ax, ay, az;
-        M5.Imu.getAccel(&ax, &ay, &az);
-        M5_LOGV("Accel: ax: %f, ay: %f, az: %f", ax, ay, az);
-        if (ay >= threshold)
-        {
-            return 0;
-        }
-        else if (ax >= threshold)
-        {
-            return 1;
-        }
-        else if (ax <= -threshold)
-        {
-            return 3;
-        }
-        else if (ay <= -threshold)
-        {
-            return 2;
-        }
-    }
-    return 0;
-}
+// uint8_t ImageViewer::detectOrientation(float threshold)
+// {
+//     if (M5.Imu.isEnabled())
+//     {
+//         float ax, ay, az;
+//         M5.Imu.getAccel(&ax, &ay, &az);
+//         M5_LOGV("Accel: ax: %f, ay: %f, az: %f", ax, ay, az);
+//         if (ay >= threshold)
+//         {
+//             return 0;
+//         }
+//         else if (ax >= threshold)
+//         {
+//             return 1;
+//         }
+//         else if (ax <= -threshold)
+//         {
+//             return 3;
+//         }
+//         else if (ay <= -threshold)
+//         {
+//             return 2;
+//         }
+//     }
+//     return 0;
+// }
 
 bool ImageViewer::parse(const char *config)
 {
