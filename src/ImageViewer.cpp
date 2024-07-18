@@ -1,49 +1,9 @@
 #include "ImageViewer.hpp"
 #include "menu.hpp"
 #include "util.hpp"
-
-int32_t getDirection(void);
-
-int32_t getDirection(void)
-{
-    if (M5.BtnA.wasClicked())
-    {
-        prtln("BtnA was Clicked!", D1_SERI);
-        return -1;
-    }
-    else if (M5.BtnC.wasClicked())
-    {
-        prtln("BtnC was Clicked!", D1_SERI);
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-// inline int32_t getTextAreaX(void)
-// {
-//     return 0;
-// }
-
-// inline int32_t getTextAreaY(void)
-// {
-//     return 0;
-// }
-
-// inline int32_t getTextAreaWidth(void)
-// {
-//     return M5.Lcd.width();
-// }
-
-// inline int32_t getTextAreaHeight(void)
-// {
-//     return M5.Lcd.height();
-// }
-
 #include <Arduino_JSON.h>
 #include <string.h>
+
 const char *ImageViewer::VERSION = "v105-mod-V202";
 const char *ImageViewer::DEFAULT_CONFIG_NAME = "/app/imgView/imgView.json";
 String ImageViewer::DATA_DIR("/Pictures");
@@ -51,35 +11,16 @@ const char *ImageViewer::KEY_DATA_DIR = "DataDir";
 const char *ImageViewer::KEY_AUTO_MODE = "AutoMode";
 const char *ImageViewer::KEY_AUTO_MODE_INTERVAL = "AutoModeInterval";
 const char *ImageViewer::KEY_AUTO_MODE_INTVAL_RND = "AutoModeRandomized";
-// const char *ImageViewer::KEY_AUTO_ROTATION = "AutoRotation";
-// const char *ImageViewer::KEY_ORIENTATION = "Orientation";
-// const float ImageViewer::GRAVITY_THRESHOLD = 0.9F;
 static const char *EXT_JPG = ".jpg";
 static const char *EXT_JPEG = ".jpeg";
 static const char *EXT_BMP = ".bmp";
 static const char *EXT_PNG = ".png";
-
-// ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval, bool isAutoModeIntvalRnd, bool isAutoRotation)
-//     : _orientation(0),
-//       _isAutoMode(isAutoMode),
-//       _autoModeInterval(autoModeInterval),
-//       _isAutoModeIntvalRnd(isAutoModeIntvalRnd),
-//       _isAutoRotation(isAutoRotation),
-//       _imageFiles{""},
-//       _nImageFiles(0),
-//       _pos(0),
-//       _prevUpdate(0),
-//       _interval(autoModeInterval)
-// {
-//     randomSeed(analogRead(0));
-// }
+static int32_t getDirection(void);
 
 ImageViewer::ImageViewer(uint8_t isAutoMode, uint32_t autoModeInterval, bool isAutoModeIntvalRnd)
-    : //   _orientation(0),
-      _isAutoMode(isAutoMode),
+    : _isAutoMode(isAutoMode),
       _autoModeInterval(autoModeInterval),
       _isAutoModeIntvalRnd(isAutoModeIntvalRnd),
-      //   _isAutoRotation(isAutoRotation),
       _imageFiles{""},
       _nImageFiles(0),
       _pos(0),
@@ -167,7 +108,6 @@ bool ImageViewer::update(void)
             return false;
         }
         this->_pos = imgPos;
-        // this->_prevUpdate = t;
         showImage(this->_imageFiles, this->_pos);
 
         prtln("t = " + String(t, 10), D1_SERI);
@@ -177,7 +117,6 @@ bool ImageViewer::update(void)
         prtln("AUTO_MODE = " + String(AUTO_MODE, 10), D1_SERI);
         prtln("prvUpdate = " + String(this->_prevUpdate, 10), D1_SERI);
         prtln("interval  = " + String(this->_interval, 10), D1_SERI);
-        // delay(1000);
         return true;
     }
     else if (!INTVAL_RND && (t - this->_prevUpdate >= this->_interval))
@@ -328,19 +267,6 @@ bool ImageViewer::setImageFileList(const String &path)
     return true;
 }
 
-// bool ImageViewer::updateOrientation(float threshold)
-// {
-//     const uint8_t o = detectOrientation(threshold);
-//     if (this->_orientation != o)
-//     {
-//         M5_LOGD("Change Orientation: %d -> %d", this->_orientation, o);
-//         this->_orientation = o;
-//         M5.Lcd.setRotation(this->_orientation);
-//         return true;
-//     }
-//     return false;
-// }
-
 uint8_t ImageViewer::getAutoMode()
 {
     return _isAutoMode;
@@ -454,33 +380,6 @@ bool ImageViewer::isImageFile(const File &f) const
     return isJpeg(name) || isPng(name) || isBmp(name);
 }
 
-// uint8_t ImageViewer::detectOrientation(float threshold)
-// {
-//     if (M5.Imu.isEnabled())
-//     {
-//         float ax, ay, az;
-//         M5.Imu.getAccel(&ax, &ay, &az);
-//         M5_LOGV("Accel: ax: %f, ay: %f, az: %f", ax, ay, az);
-//         if (ay >= threshold)
-//         {
-//             return 0;
-//         }
-//         else if (ax >= threshold)
-//         {
-//             return 1;
-//         }
-//         else if (ax <= -threshold)
-//         {
-//             return 3;
-//         }
-//         else if (ay <= -threshold)
-//         {
-//             return 2;
-//         }
-//     }
-//     return 0;
-// }
-
 bool ImageViewer::parse(const char *config)
 {
     if (config == nullptr)
@@ -541,45 +440,6 @@ bool ImageViewer::parse(const char *config)
           String(this->_isAutoModeIntvalRnd ? "true" : "false");
     prtln(msg);
 
-    // if (o.hasOwnProperty(KEY_AUTO_ROTATION))
-    // {
-    //     this->_isAutoRotation = (bool)o[KEY_AUTO_ROTATION];
-    // }
-    // msg = " AutoRotation: " + String(this->_isAutoRotation ? "true" : "false");
-    // prtln(msg);
-
-    // if (o.hasOwnProperty(KEY_ORIENTATION))
-    // {
-    //     JSONVar orientationVar = o[KEY_ORIENTATION];
-    //     if (JSON.typeof(orientationVar) == "number")
-    //     {
-    //         int orientationInt = (int)orientationVar;
-    //         if (0 <= orientationInt && orientationInt <= 7)
-    //         {
-    //             this->_orientation = orientationInt;
-    //         }
-    //         else
-    //         {
-    //             this->_orientation = M5.Lcd.getRotation();
-    //             M5_LOGE("Invalid Orientation Value: %d", orientationInt);
-    //         }
-    //     }
-    //     else
-    //     {
-    //         this->_orientation = M5.Lcd.getRotation();
-    //         M5_LOGE("Illegal Orientation Type: %s, Value: %s",
-    //                 JSON.typeof(orientationVar).c_str(),
-    //                 JSONVar::stringify(orientationVar).c_str());
-    //     }
-    // }
-    // else
-    // {
-    //     this->_orientation = M5.Lcd.getRotation();
-    //     M5_LOGW("Default Orientation is not found");
-    // }
-    // M5.Lcd.printf(" Orientation: %s", getOrientationString(this->_orientation));
-    // M5.Lcd.println();
-
     // --- DATA_DIR ---
     if (o.hasOwnProperty(KEY_DATA_DIR))
     {
@@ -591,4 +451,22 @@ bool ImageViewer::parse(const char *config)
     }
 
     return true;
+}
+
+static int32_t getDirection(void)
+{
+    if (M5.BtnA.wasClicked())
+    {
+        prtln("BtnA was Clicked!", D1_SERI);
+        return -1;
+    }
+    else if (M5.BtnC.wasClicked())
+    {
+        prtln("BtnC was Clicked!", D1_SERI);
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }

@@ -35,7 +35,7 @@ public:
 
     virtual bool begin(const int bgColor = TFT_WHITE);
     virtual bool update(void);
-    virtual uint8_t getAutoMode(); 
+    virtual uint8_t getAutoMode();
     virtual void setAutoMode(uint8_t mode);
     virtual uint32_t getIntval();
     virtual void setIntval(uint32_t intval);
